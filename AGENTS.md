@@ -36,10 +36,11 @@ plugin marketplace.
   prove the in-house package pins match tinyland-inc/bazel-registry. The
   canonical site build is pnpm/Vite through `just`; never wire the site build
   through Bazel.
-- **Runner pickup is the only current remote-execution evidence.** CI and Pages
-  use the `tinyland-docker` ARC capability. ARC runner pickup does not prove
-  GloriousFlywheel consumer enrollment, shared-cache attachment, REAPI, or RBE;
-  those remain unproved and unclaimed here.
+- **The hosted bridge is not remote-execution evidence.** CI and Pages
+  temporarily use the GitHub-hosted `ubuntu-latest` capability during ownership
+  migration. GitHub-hosted runner pickup does not prove GloriousFlywheel
+  consumer enrollment, shared-cache attachment, REAPI, or RBE; those remain
+  unproved and unclaimed here.
 - **The public agent handoff stays product-owned.** Preserve `/agent`,
   `static/llms.txt`, and the packet-synced `static/agent-map.md`, including
   their prerender, sitemap, and browser coverage. This site owns `/agent` and
@@ -59,5 +60,8 @@ plugin marketplace.
 ## Commands
 
 `just setup | dev | check | lint | test | e2e | build` (thin wrappers over the
-`package.json` pnpm scripts). Use `nix shell nixpkgs#nodejs nixpkgs#pnpm -c ...`
-if node/pnpm are not on PATH.
+`package.json` pnpm scripts). The committed content manifest pins the packet
+repository, commit, and printable digest; only `just packet-lock <40-char-sha>`
+advances the source commit. Do not interrupt or run concurrent lock advances.
+Use `nix shell
+nixpkgs#nodejs nixpkgs#pnpm -c ...` if node/pnpm are not on PATH.

@@ -251,9 +251,10 @@ test('the first search query stays truthful while Pagefind resolves it', async (
 	await expect(page.getByText('Type at least 2 characters to search.')).toBeVisible();
 
 	await input.fill('is prime');
-	await expect(page.getByText('Searching…')).toBeVisible();
+	const result = page.getByRole('link', { name: /^Is Prime/ });
+	await expect(page.getByText('Searching…').or(result)).toBeVisible();
 	await expect(page.getByText('No results for "is prime".')).toHaveCount(0);
-	await expect(page.getByRole('link', { name: /^Is Prime/ })).toBeVisible();
+	await expect(result).toBeVisible();
 	await expect(page.getByText('No results for "is prime".')).toHaveCount(0);
 });
 

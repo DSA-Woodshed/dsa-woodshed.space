@@ -5,11 +5,9 @@ name: Deploy to GitHub Pages
 # base="" / no BASE_PATH). Plain pnpm + adapter-static build published to
 # GitHub Pages.
 #
-# RUNNERS: jobs run on the self-hosted ARC pool for this repo (shared
-# capability label `tinyland-docker`; scale set jesssullivan-dsa-woodshed-
-# browser, image ghcr.io/tinyland-inc/actions-runner-browser — Playwright
-# system libs pre-baked). Keeps browser-capable work on the shared pool and
-# off GitHub-hosted minutes.
+# RUNNERS: jobs temporarily use GitHub-hosted runners as a bounded ownership-
+# migration bridge. This keeps the full production/browser proof independent
+# of personal ARC; it is not evidence of GloriousFlywheel enrollment or RBE.
 #
 # CONTENT SYNC: src/content is generated — a fresh checkout carries only the
 # committed .manifest.json, and `pnpm run build` does NOT sync, so the build
@@ -21,9 +19,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  # Packet changes do not push this repository. A conservative daily
-  # self-hosted ARC rebuild bounds public content lag without consuming
-  # GitHub-hosted minutes.
+  # Packet changes do not move this repository's lock. A conservative daily
+  # deployment canaries reproducibility of the committed site/packet pair.
   schedule:
     - cron: '17 8 * * *'
   workflow_dispatch:
@@ -32,16 +29,24 @@ permissions:
   contents: read
 
 concurrency:
-  group: github-pages-${{ github.ref }}
-  cancel-in-progress: false
+  group: github-pages-production
+  cancel-in-progress: true
 
 jobs:
   build:
     name: Build static site
-    runs-on: tinyland-docker
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Read the committed packet lock
+        id: packet-lock
+        run: node scripts/packet-lock.mjs --github-output
 
       # Content source: the public study packet. The site renders content
       # synced from it; without this checkout + the sync step below, the
@@ -49,15 +54,12 @@ jobs:
       - name: Check out the study packet
         uses: actions/checkout@v7
         with:
-          repository: Jesssullivan/dsa-study-packet
+          repository: ${{ steps.packet-lock.outputs.repository }}
+          ref: ${{ steps.packet-lock.outputs.commit }}
           path: dsa-study-packet
 
-      # Self-hosted runner image ships no system node: setup-node must run
-      # BEFORE pnpm/action-setup (whose self-installer needs node), and
-      # `cache: pnpm` can't be used (it needs pnpm before pnpm exists).
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '22'
+      - name: Verify the locked packet checkout
+        run: node scripts/packet-lock.mjs --verify-checkout "${{ github.workspace }}/dsa-study-packet"
 
       - uses: pnpm/action-setup@v6
         with:
@@ -72,17 +74,26 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           WOODSHED_PACKET_PATH: ${{ github.workspace }}/dsa-study-packet
 
+      - name: Verify the packet lock reproduced exactly
+        run: |
+          node scripts/packet-lock.mjs --verify-generated \
+            "${{ steps.packet-lock.outputs.repository }}" \
+            "${{ steps.packet-lock.outputs.commit }}" \
+            "${{ steps.packet-lock.outputs.booklet_digest }}"
+          git diff --exit-code -- src/content/.manifest.json static/agent-map.md
+
       - name: Install playwright chromium
-        # The runner image pre-bakes Playwright's system libs — browser
-        # binary download only. Must precede the build: mermaid-isomorphic
-        # renders diagrams through this browser at build time and falls
-        # back to source otherwise.
-        run: pnpm exec playwright install chromium
+        # Must precede the build: mermaid-isomorphic renders diagrams through
+        # this browser at build time and falls back to source otherwise.
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Build static site (custom domain, base="")
         run: pnpm run build
         env:
           NODE_ENV: production
+
+      - name: Write exact deployment receipt
+        run: node scripts/deployment-receipt.mjs --write build/deployment-receipt.json "${{ github.sha }}"
 
       - uses: actions/upload-pages-artifact@v5
         with:
@@ -97,7 +108,7 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     needs: build
-    runs-on: tinyland-docker
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
@@ -107,5 +118,27 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Refuse an out-of-date main deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current_main="$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)"
+          test "$current_main" = "$GITHUB_SHA" || {
+            echo "refusing stale Pages deployment: run=$GITHUB_SHA main=$current_main" >&2
+            exit 1
+          }
+
       - uses: actions/deploy-pages@v5
         id: deployment
+
+      - name: Verify production serves this exact site and packet pair
+        run: |
+          node scripts/deployment-receipt.mjs --verify-url \
+            "https://dsa-woodshed.space/deployment-receipt.json?site=${GITHUB_SHA}" \
+            "$GITHUB_SHA"

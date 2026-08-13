@@ -19,27 +19,33 @@ concurrency:
 jobs:
   gates:
     name: check / lint / unit / build / e2e
-    runs-on: tinyland-docker
+    # Temporary ownership-migration bridge: keep the complete browser matrix
+    # independent of personal ARC while repository ownership moves.
+    runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
 
-      - name: Check out the study packet
-        uses: actions/checkout@v7
-        with:
-          repository: Jesssullivan/dsa-study-packet
-          path: dsa-study-packet
-
-      # Self-hosted runner image ships no system node: setup-node must run
-      # BEFORE pnpm/action-setup (whose self-installer needs node), and
-      # `cache: pnpm` can't be used (it needs pnpm before pnpm exists).
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
 
-      # The ARC image intentionally carries no host-level `just`. Pin both
-      # the installer action and command version so the public front door is
-      # reproducible without coupling it to runner-image contents.
+      - name: Read the committed packet lock
+        id: packet-lock
+        run: node scripts/packet-lock.mjs --github-output
+
+      - name: Check out the study packet
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ steps.packet-lock.outputs.repository }}
+          ref: ${{ steps.packet-lock.outputs.commit }}
+          path: dsa-study-packet
+
+      - name: Verify the locked packet checkout
+        run: node scripts/packet-lock.mjs --verify-checkout "${{ github.workspace }}/dsa-study-packet"
+
+      # Pin both the installer action and command version so the public front
+      # door does not depend on runner-image contents.
       - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
         with:
           just-version: '1.57.0'
@@ -56,6 +62,14 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           WOODSHED_PACKET_PATH: ${{ github.workspace }}/dsa-study-packet
 
+      - name: Verify the packet lock reproduced exactly
+        run: |
+          node scripts/packet-lock.mjs --verify-generated \
+            "${{ steps.packet-lock.outputs.repository }}" \
+            "${{ steps.packet-lock.outputs.commit }}" \
+            "${{ steps.packet-lock.outputs.booklet_digest }}"
+          git diff --exit-code -- src/content/.manifest.json static/agent-map.md
+
       # Run the public test front door before svelte-check has generated
       # .svelte-kit metadata. This keeps the cold-checkout contract observable.
       - name: Test from a cold SvelteKit checkout
@@ -70,11 +84,9 @@ jobs:
       - run: pnpm run lint
 
       - name: Install playwright chromium
-        # The runner image pre-bakes Playwright's system libs — browser
-        # binary download only, no runtime apt (--with-deps) needed. Must
-        # precede the build: mermaid-isomorphic renders diagrams through
-        # this browser at build time and falls back to source otherwise.
-        run: pnpm exec playwright install chromium
+        # Mermaid SSR uses Chromium during build and Playwright reuses it for
+        # the browser matrix. GitHub-hosted runners install matching system libs.
+        run: pnpm exec playwright install --with-deps chromium
       - run: pnpm run build
       - run: pnpm run test:e2e
 
@@ -87,7 +99,7 @@ jobs:
     # resolvable. Version parity with package.json is enforced separately by
     # scripts/check-inhouse-package-parity.py inside `pnpm run lint`.
     name: bazel mod graph
-    runs-on: tinyland-docker
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7

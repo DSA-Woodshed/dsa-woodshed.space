@@ -143,6 +143,16 @@ describe('generated metadata', () => {
 		expect(serializeBookletMetadata(parseBookletMetadata(serialized))).toBe(serialized);
 	});
 
+	it('accepts a transferred-owner release when every URL belongs to that repository', () => {
+		const sourceRepo = 'DSA-Woodshed/dsa-study-packet';
+		const payload = releasePayload();
+		payload.html_url = payload.html_url.replace(SOURCE_REPO, sourceRepo);
+		payload.assets[1].browser_download_url = payload.assets[1].browser_download_url.replace(SOURCE_REPO, sourceRepo);
+		const metadata = resolveBookletRelease(payload, sourceRepo);
+
+		expect(parseBookletMetadata(serializeBookletMetadata(metadata))).toEqual(metadata);
+	});
+
 	it('rejects invalid JSON and metadata that does not point at the same-origin asset', () => {
 		expect(() => parseBookletMetadata('{')).toThrow('not valid JSON');
 
@@ -156,6 +166,26 @@ describe('generated metadata', () => {
 });
 
 describe('syncBookletRelease', () => {
+	it('reproduces pinned metadata without consulting the mutable latest-release endpoint', async () => {
+		const root = mkdtempSync(join(tmpdir(), 'woodshed-booklet-locked-'));
+		tempRoots.push(root);
+		const output = paths(root);
+		const bytes = pdfBytes('pinned release');
+		const metadata = resolveBookletRelease(releasePayload(bytes));
+		const calls: string[] = [];
+		const fetchImpl = async (input: string | URL | Request) => {
+			const url = String(input);
+			calls.push(url);
+			return new Response(bytes, { status: 200 });
+		};
+
+		const observed = await syncBookletRelease({ ...output, fetchImpl, lockedMetadata: metadata });
+
+		expect(observed).toEqual(metadata);
+		expect(calls).toEqual([metadata.asset.downloadUrl]);
+		expect(parseBookletMetadata(readFileSync(output.metadataPath, 'utf8'))).toEqual(metadata);
+	});
+
 	it('publishes verified PDF and metadata artifacts', async () => {
 		const root = mkdtempSync(join(tmpdir(), 'woodshed-booklet-sync-'));
 		tempRoots.push(root);
