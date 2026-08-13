@@ -16,6 +16,7 @@ const HERE = dirname(THIS_FILE);
 const REPO_ROOT = resolve(HERE, '..');
 
 export const SOURCE_REPO = 'Jesssullivan/dsa-study-packet';
+export const BOOKLET_REPOSITORIES = new Set([SOURCE_REPO, 'DSA-Woodshed/dsa-study-packet']);
 export const BOOKLET_ASSET_NAME = 'booklet.pdf';
 export const LATEST_RELEASE_API_URL = `https://api.github.com/repos/${SOURCE_REPO}/releases/latest`;
 export const BOOKLET_METADATA_PATH = join(REPO_ROOT, 'src', 'content', '.booklet.json');
@@ -67,6 +68,15 @@ function requireHttpsUrl(value, label, allowedHost) {
 	return parsed.toString();
 }
 
+function requireReleaseUrl(value, label, sourceRepo) {
+	const url = requireHttpsUrl(value, label, 'github.com');
+	const path = new URL(url).pathname;
+	if (!path.startsWith(`/${sourceRepo}/releases/`)) {
+		throw new Error(`booklet release ${label} does not belong to ${sourceRepo}: ${JSON.stringify(url)}`);
+	}
+	return url;
+}
+
 function requireDigest(value) {
 	const digest = requireNonemptyString(value, 'asset digest');
 	if (!/^sha256:[0-9a-f]{64}$/.test(digest)) {
@@ -95,7 +105,7 @@ function requireSize(value) {
  * @param {unknown} payload
  * @returns {BookletMetadata}
  */
-export function resolveBookletRelease(payload) {
+export function resolveBookletRelease(payload, sourceRepo = SOURCE_REPO) {
 	if (!isRecord(payload)) {
 		throw new Error('GitHub latest-release response is not an object');
 	}
@@ -116,16 +126,19 @@ export function resolveBookletRelease(payload) {
 	}
 	const digest = requireDigest(asset.digest);
 
+	if (!BOOKLET_REPOSITORIES.has(sourceRepo)) {
+		throw new Error(`booklet release sourceRepo is not approved: ${sourceRepo}`);
+	}
 	return {
-		sourceRepo: SOURCE_REPO,
+		sourceRepo,
 		tagName: requireNonemptyString(payload.tag_name, 'tag_name'),
 		publishedAt,
-		releaseUrl: requireHttpsUrl(payload.html_url, 'html_url', 'github.com'),
+		releaseUrl: requireReleaseUrl(payload.html_url, 'html_url', sourceRepo),
 		asset: {
 			name: BOOKLET_ASSET_NAME,
 			size: requireSize(asset.size),
 			digest,
-			downloadUrl: requireHttpsUrl(asset.browser_download_url, 'asset download URL', 'github.com'),
+			downloadUrl: requireReleaseUrl(asset.browser_download_url, 'asset download URL', sourceRepo),
 			localUrl: bookletLocalUrl(digest),
 		},
 	};
@@ -147,7 +160,7 @@ export function parseBookletMetadata(text) {
 	if (!isRecord(value) || !isRecord(value.asset)) {
 		throw new Error('generated booklet metadata has an invalid shape');
 	}
-	if (value.sourceRepo !== SOURCE_REPO) {
+	if (!BOOKLET_REPOSITORIES.has(value.sourceRepo)) {
 		throw new Error(`generated booklet metadata has an invalid sourceRepo: ${value.sourceRepo}`);
 	}
 	const digest = requireDigest(value.asset.digest);
@@ -161,15 +174,15 @@ export function parseBookletMetadata(text) {
 	}
 
 	return {
-		sourceRepo: SOURCE_REPO,
+		sourceRepo: value.sourceRepo,
 		tagName: requireNonemptyString(value.tagName, 'tagName'),
 		publishedAt,
-		releaseUrl: requireHttpsUrl(value.releaseUrl, 'releaseUrl', 'github.com'),
+		releaseUrl: requireReleaseUrl(value.releaseUrl, 'releaseUrl', value.sourceRepo),
 		asset: {
 			name: BOOKLET_ASSET_NAME,
 			size: requireSize(value.asset.size),
 			digest,
-			downloadUrl: requireHttpsUrl(value.asset.downloadUrl, 'downloadUrl', 'github.com'),
+			downloadUrl: requireReleaseUrl(value.asset.downloadUrl, 'downloadUrl', value.sourceRepo),
 			localUrl: bookletLocalUrl(digest),
 		},
 	};
@@ -279,6 +292,7 @@ function removeArtifacts(paths) {
  *   assetRoot?: string,
  *   apiUrl?: string,
  *   fetchTimeoutMs?: number,
+ *   lockedMetadata?: BookletMetadata,
  * }} [options]
  * @returns {Promise<BookletMetadata>}
  */
@@ -289,6 +303,7 @@ export async function syncBookletRelease({
 	assetRoot = STATIC_ASSET_ROOT,
 	apiUrl = LATEST_RELEASE_API_URL,
 	fetchTimeoutMs = DEFAULT_FETCH_TIMEOUT_MS,
+	lockedMetadata,
 } = {}) {
 	const tempSuffix = `.tmp-${process.pid}`;
 	const tempMetadataPath = `${metadataPath}${tempSuffix}`;
@@ -298,11 +313,16 @@ export async function syncBookletRelease({
 	if (!pdfPath) removeGeneratedBooklets(assetRoot);
 
 	try {
-		const releaseResponse = await requireOk(
-			await fetchWithTimeout(fetchImpl, apiUrl, 'GitHub latest-release request', fetchTimeoutMs),
-			'GitHub latest-release request',
-		);
-		const metadata = resolveBookletRelease(await releaseResponse.json());
+		let metadata;
+		if (lockedMetadata) {
+			metadata = parseBookletMetadata(serializeBookletMetadata(lockedMetadata));
+		} else {
+			const releaseResponse = await requireOk(
+				await fetchWithTimeout(fetchImpl, apiUrl, 'GitHub latest-release request', fetchTimeoutMs),
+				'GitHub latest-release request',
+			);
+			metadata = resolveBookletRelease(await releaseResponse.json());
+		}
 		resolvedPdfPath ??= bookletPath(assetRoot, metadata.asset.localUrl);
 		tempPdfPath ??= `${resolvedPdfPath}${tempSuffix}`;
 		removeArtifacts([resolvedPdfPath, tempPdfPath]);

@@ -84,8 +84,8 @@ expect_equal(
 expect_equal(
     declaration.get("execution_evidence"),
     {
-        "github_actions_capability": "tinyland-docker",
-        "runner_pickup": "arc-only",
+        "github_actions_capability": "ubuntu-latest",
+        "runner_pickup": "github-hosted-ownership-migration-bridge",
         "gf_consumer_enrollment": "unproved",
         "gf_shared_cache": "unproved",
         "gf_reapi_rbe": "unproved",
@@ -118,7 +118,7 @@ for label, text in (("README.md", readme), ("AGENTS.md", agents)):
             ".agents/skills",
             ".claude-plugin",
             "plugins/scaffold-core",
-            "ARC runner pickup",
+            "GitHub-hosted runner pickup",
             "does not prove",
             "shared-cache",
             "REAPI",
@@ -183,7 +183,7 @@ expect_contains(
     (
         "const AGENT_MAP_INPUT = 'agent-map.md';",
         "const AGENT_MAP_PATH = join(REPO_ROOT, 'static', 'agent-map.md');",
-        "const SOURCE_REPO = 'Jesssullivan/dsa-study-packet';",
+        "const sourceRepo = lock.sourceRepo;",
     ),
     "packet agent-map sync",
 )
@@ -231,9 +231,9 @@ workflows = "\n".join(path.read_text(encoding="utf-8") for path in workflow_path
 if "runs-on:" not in workflows:
     ERRORS.append("workflows: no runner declarations found")
 for line in workflows.splitlines():
-    if "runs-on:" in line and line.strip() != "runs-on: tinyland-docker":
+    if "runs-on:" in line and line.strip() != "runs-on: ubuntu-latest":
         ERRORS.append(f"workflows: unexpected runner declaration {line.strip()!r}")
-for stale_claim in ("GF-backed", "GloriousFlywheel"):
+for stale_claim in ("GF-backed", "GloriousFlywheel-backed"):
     if stale_claim in workflows:
         ERRORS.append(f"workflows: stale GF execution claim present: {stale_claim!r}")
 

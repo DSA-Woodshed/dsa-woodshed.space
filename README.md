@@ -27,19 +27,29 @@ source of truth for guides, reference sheets, algorithms, and printable source
 material. This repository owns the site shell, navigation, route copy, and
 rendering code.
 
-`scripts/sync-content.mjs` reads a packet checkout at
-`WOODSHED_PACKET_PATH`, or `../dsa-study-packet` by default, and writes build
-inputs under the gitignored `src/content/`. It also updates the committed
-`src/content/.manifest.json` and refreshes the same-origin
+`scripts/sync-content.mjs` uses a packet Git checkout at `WOODSHED_PACKET_PATH`,
+or `../dsa-study-packet` by default, as an object database and writes build
+inputs under the gitignored `src/content/`. The committed
+`src/content/.manifest.json` is the exact input lock; ordinary syncs and
+builds reproduce its `sourceRepo`, `sourceCommit`, and printable release digest
+even when packet `main` or its latest release has advanced. Sync also refreshes the same-origin
 `static/agent-map.md` from the packet's machine-readable map. The manifest pins
 that map's source path and digest alongside the rendered content. The source
-sync resolves `HEAD` once and reads every commit-sourced packet artifact from
+sync resolves the lock once and reads every commit-sourced packet artifact from
 that immutable commit. It is deterministic and does not use the packet working
-tree. `just verify-content-sync` rejects any body or map whose published bytes
-no longer match the manifest.
+tree or the checkout's current branch. `just verify-content-sync` rejects any
+body or map whose published bytes no longer match the manifest.
 
-The same command resolves the packet's latest stable GitHub release, downloads
-its single `booklet.pdf`, and verifies the release size, SHA-256 digest, and PDF
+Advance the packet revision only through `just packet-lock <40-char-sha>`. It
+validates that the commit is published, holds an exclusive transaction marker,
+regenerates content while retaining the pinned printable, restores tracked and
+generated outputs on a caught failure, and prints the old and new revision pair.
+Do not interrupt this maintainer transaction. CI and Pages read the same lock
+before checkout, verify the checkout, and reject any post-sync manifest,
+printable-digest, or agent-map drift.
+
+The same sync downloads the manifest-pinned stable GitHub release's single
+`booklet.pdf` and verifies the release size, SHA-256 digest, and PDF
 signature before accepting it. Generated metadata lives at the gitignored
 `src/content/.booklet.json`; the PDF uses a digest-addressed path under
 `static/generated/`. This step requires outbound access to the public GitHub API
@@ -77,6 +87,7 @@ just build
 just verify-booklet
 just e2e
 just repo-profile
+just packet-lock <40-char-sha>
 ```
 
 The equivalent underlying setup and development commands are
@@ -103,9 +114,11 @@ machine-readable contract in `tinyland.repo.json` is enforced by
 - The site does not inherit `.agents/skills`, `.claude-plugin`, or
   `plugins/scaffold-core` merely for parity with the house scaffold.
 - Runtime backend, auth, payments, and apply authority are all absent.
-- CI and Pages currently prove `tinyland-docker` ARC runner pickup only. ARC
-  runner pickup does not prove GloriousFlywheel consumer enrollment,
-  shared-cache attachment, REAPI, or RBE; those remain unproved and unclaimed.
+- CI and Pages temporarily use GitHub-hosted runners as a bounded ownership-
+  migration bridge. GitHub-hosted runner pickup proves scheduling. Pickup does not prove
+  the matrix. A green exact-head run proves the complete site/browser matrix.
+  GloriousFlywheel enrollment, shared-cache attachment, REAPI, and RBE remain
+  unproved and unclaimed here and belong to separate maintainer-validation work.
 
 ### Selective scaffold audit ledger
 
@@ -124,11 +137,14 @@ wholesale convergence obligation.
 
 ## Deploy
 
-Pushes to `main` and a daily scheduled refresh run
+Pushes to `main` and a daily scheduled reproducibility deployment run
 `.github/workflows/deploy-pages.yml`. The workflow checks out this repository
-and the public packet, syncs content, builds the static site, and publishes
-`build/` to GitHub Pages at `dsa-woodshed.space`. CI runs the same check, lint,
-unit, build, and browser gates on pull requests.
+and the exact public packet revision and printable committed in the manifest,
+syncs content, builds the static site, and publishes `build/` to GitHub Pages at
+`dsa-woodshed.space`. A constant concurrency group rejects stale-main runs, and
+the deployment finishes only after production serves the embedded site, packet,
+and printable receipt. CI runs the same check, lint, unit, build, and browser
+gates on pull requests.
 
 The app began as a private house SvelteKit scaffold. Estate coupling was
 removed: there is no Nix flake, private CI template, private-registry package,

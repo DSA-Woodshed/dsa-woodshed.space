@@ -18,9 +18,15 @@ setup:
 	pnpm install --frozen-lockfile
 
 # Sync content from the DSA study packet into src/content/ (BUILD INPUT).
-# Source root defaults to ../dsa-study-packet; override with WOODSHED_PACKET_PATH.
+# Reproduces the exact revision in src/content/.manifest.json. The packet Git
+# object database defaults to ../dsa-study-packet; override WOODSHED_PACKET_PATH.
 sync-content:
 	pnpm run sync-content
+
+# Advance the committed packet revision and regenerate all packet-owned inputs
+# as one rollback unit. SHA must be a reachable lowercase 40-character commit.
+packet-lock sha:
+	node scripts/packet-lock.mjs "{{sha}}"
 
 # Type-check + svelte-check.
 check: sync-content
