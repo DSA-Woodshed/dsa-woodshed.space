@@ -9,7 +9,7 @@
 	// $lib/generated/source-map.json. The DSA Woodshed is a reading surface over a
 	// SEPARATE content repo, so instead this component takes the content-repo
 	// source path directly and resolves edit/view URLs through $lib/repo.ts
-	// (pointed at Jesssullivan/dsa-study-packet). No org/repo string is hardcoded.
+	// (pointed at DSA-Woodshed/dsa-study-packet). No org/repo string is hardcoded.
 	import { Code, Pencil } from '@lucide/svelte';
 	import { editUrl, blobUrl } from '$lib/repo';
 

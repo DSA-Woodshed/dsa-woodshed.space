@@ -37,7 +37,8 @@ for (const bp of breakpoints) {
 	for (const route of routes) {
 		test(`${route} has no document overflow at ${bp.label} (${bp.width}px)`, async ({ page }) => {
 			await page.setViewportSize({ width: bp.width, height: bp.height });
-			await page.goto(route);
+			const response = await page.goto(route);
+			expect(response?.ok(), `${route} must serve a real product page`).toBe(true);
 			await page.waitForLoadState('networkidle');
 			const { scrollWidth, innerWidth } = await page.evaluate(() => ({
 				scrollWidth: document.documentElement.scrollWidth,
@@ -97,46 +98,26 @@ test('Project is current without also marking Method', async ({ page }) => {
 	await page.setViewportSize({ width: 1440, height: 1200 });
 	await page.goto('/project');
 	await expect(page.getByRole('heading', { level: 1, name: 'A public woodshed' })).toBeVisible();
-	await expect(page.getByRole('link', { name: 'Source and privacy contract' })).toHaveAttribute(
+	await expect(page.getByRole('main').getByRole('link', { name: 'Source and privacy contract' })).toHaveAttribute(
 		'href',
 		'/guide/source-of-truth',
 	);
-	const navigation = page.getByRole('navigation', { name: 'Section navigation' });
+	const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
 	await expect(navigation.getByRole('link', { name: 'Project' })).toHaveAttribute('aria-current', 'page');
 	await expect(navigation.getByRole('link', { name: 'Method' })).not.toHaveAttribute('aria-current');
 	await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toHaveCount(0);
 });
 
-test('/agent renders and serves the read order, live machine map, and packet links', async ({ page, request }) => {
-	await page.setViewportSize({ width: 1440, height: 1200 });
+test('retired orientation URL redirects to ordinary Project', async ({ page }) => {
 	await page.goto('/agent');
-	await expect(page.getByRole('heading', { level: 1, name: 'Read this first' })).toBeVisible();
-	await expect(page.getByRole('heading', { level: 2, name: 'Live machine map' })).toBeVisible();
-	await expect(page.getByRole('link', { name: 'Open the current agent map' })).toHaveAttribute('href', '/agent-map.md');
-	await expect(page.getByRole('link', { name: 'View its packet source' })).toHaveAttribute(
-		'href',
-		/^https:\/\/github\.com\/[^/]+\/[^/]+\/blob\/[0-9a-f]{40}\/agent-map\.md$/,
-	);
-	await expect(page.getByText('just practice-start comments|reacto|clarp|umpire')).toHaveCount(0);
-	const agentMap = await request.get('/agent-map.md');
-	expect(agentMap.ok()).toBe(true);
-	expect(await agentMap.text()).toMatch(/^# .+ Agent Map/m);
-	await expect(page.getByRole('link', { name: 'AGENTS.md', exact: true })).toHaveAttribute(
-		'href',
-		'https://github.com/Jesssullivan/dsa-study-packet/blob/main/AGENTS.md',
-	);
-	await expect(page.getByRole('link', { name: 'TRACK-CONTRACT.md', exact: true })).toHaveAttribute(
-		'href',
-		'https://github.com/Jesssullivan/dsa-study-packet/blob/main/TRACK-CONTRACT.md',
-	);
-	await expect(page.getByRole('link', { name: 'llms.txt' })).toHaveAttribute('href', '/llms.txt');
-	await expect(page.getByRole('link', { name: 'agent-map.md' })).toHaveAttribute('href', '/agent-map.md');
+	await expect(page).toHaveURL(/\/project$/);
+	await expect(page.getByRole('heading', { level: 1, name: 'A public woodshed' })).toBeVisible();
 });
 
 test('/guide/source-of-truth never marks Method or Project current at once', async ({ page }) => {
 	await page.setViewportSize({ width: 1440, height: 1200 });
 	await page.goto('/guide/source-of-truth');
-	const navigation = page.getByRole('navigation', { name: 'Section navigation' });
+	const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
 	await expect(navigation.getByRole('link', { name: 'Method' })).not.toHaveAttribute('aria-current');
 	await expect(navigation.getByRole('link', { name: 'Project' })).not.toHaveAttribute('aria-current');
 });
@@ -145,8 +126,8 @@ test('home defaults to ordinary comments and keeps Printables easy to reach', as
 	await page.goto('/');
 	const defaultComments = page.getByRole('region', { name: 'Start with ordinary comments' });
 	await expect(defaultComments).toBeVisible();
-	await expect(defaultComments).toContainText(/There are no\s+required prefixes or labels/);
-	await expect(defaultComments).toContainText('/reacto');
+	await expect(defaultComments).toContainText(/There are no\s+required prefixes\s+or labels/);
+	await expect(defaultComments).toContainText('Personal interviewer integrations');
 	await expect(defaultComments).toContainText('optional labels');
 	await expect(
 		page.getByRole('navigation', { name: 'Library shortcuts' }).getByRole('link', { name: 'Printables' }),

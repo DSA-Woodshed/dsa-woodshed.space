@@ -25,8 +25,7 @@ export default defineConfig({
 				launchOptions: chromiumExecutablePath ? { executablePath: chromiumExecutablePath } : undefined,
 			},
 		},
-		// Firefox + WebKit gated behind PLAYWRIGHT_ALL_BROWSERS to keep M0 fast.
-		// Enable in M1 CI by setting PLAYWRIGHT_ALL_BROWSERS=1.
+		// Optional cross-browser acceptance uses PLAYWRIGHT_ALL_BROWSERS=1.
 		...(process.env.PLAYWRIGHT_ALL_BROWSERS
 			? [
 					{
@@ -41,7 +40,7 @@ export default defineConfig({
 			: []),
 	],
 	webServer: {
-		command: 'pnpm run build && pnpm exec serve build -l ' + port,
+		command: 'python3 scripts/bazel_output.py preview --port ' + port,
 		port,
 		timeout: 180_000,
 		reuseExistingServer: !process.env.CI,

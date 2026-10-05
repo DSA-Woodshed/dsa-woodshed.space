@@ -7,7 +7,7 @@ If you find a security issue (e.g. an XSS vector in the markdown renderer, or
 private data that was mistakenly published), please report it privately via the
 content repository's advisory form:
 
-https://github.com/Jesssullivan/dsa-study-packet/security/advisories/new
+https://github.com/DSA-Woodshed/dsa-study-packet/security/advisories/new
 
-`gitleaks` config (`.gitleaks.toml`) is retained from the scaffold as a
-pre-commit / CI secret-scan gate. No credentials should ever be committed.
+The scaffold's `.gitleaks.toml` supports local checks with `gitleaks git --redact`.
+No credentials should ever be committed.

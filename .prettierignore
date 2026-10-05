@@ -6,6 +6,6 @@ static
 # Authored content mirrored from the study packet repo — not our style domain.
 src/content
 pnpm-lock.yaml
-# CI checks out the packet repo INSIDE the workspace (deploy-key content
-# sync); it is a content source, never our style domain.
+# CI checks out the exact public packet revision inside the workspace.
+# Packet formatting is maintained in that repository.
 dsa-study-packet

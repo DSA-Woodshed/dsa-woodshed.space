@@ -15,7 +15,7 @@ import {
 	verifyBookletBytes,
 } from './sync-booklet.mjs';
 
-const SOURCE_REPO = 'Jesssullivan/dsa-study-packet';
+const SOURCE_REPO = 'DSA-Woodshed/dsa-study-packet';
 
 function pdfBytes(body = 'test booklet') {
 	return Buffer.from(`%PDF-1.7\n${body}\n%%EOF\n`, 'utf8');

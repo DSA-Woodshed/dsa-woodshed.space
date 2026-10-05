@@ -61,8 +61,8 @@ const config = {
 	},
 	kit: {
 		adapter: adapter({
-			pages: 'build',
-			assets: 'build',
+			pages: process.env.BUILD_OUTPUT_DIR || 'build',
+			assets: process.env.BUILD_OUTPUT_DIR || 'build',
 			// No SPA fallback: build/404.html is the PRERENDERED src/routes/404
 			// page (full HTML, no-JS-required), which GitHub Pages serves for
 			// every unknown URL. A fallback shell here would shadow it with an

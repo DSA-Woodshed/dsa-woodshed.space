@@ -87,7 +87,9 @@ let rendererPromise: Promise<MermaidRenderer> | null = null;
 
 function getRenderer(): Promise<MermaidRenderer> {
 	rendererPromise ??= import('mermaid-isomorphic').then(({ createMermaidRenderer }) =>
-		createMermaidRenderer({ launchOptions: { args: ['--no-sandbox'] } }),
+		createMermaidRenderer({
+			launchOptions: { args: ['--no-sandbox'], executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH },
+		}),
 	);
 	return rendererPromise;
 }
@@ -206,10 +208,12 @@ export async function renderWithCache(
 				outcomes[i] = result.value.svg;
 				writeCachedSvg(cacheDir, keys[i], result.value.svg);
 			} else {
+				if (process.env.WOODSHED_DIAGRAM_DIAGNOSTICS === '1') console.error('Mermaid diagram failed:', result.reason);
 				outcomes[i] = null;
 			}
 		});
-	} catch {
+	} catch (error) {
+		if (process.env.WOODSHED_DIAGRAM_DIAGNOSTICS === '1') console.error('Mermaid browser render failed:', error);
 		for (const i of missIndexes) outcomes[i] = null;
 	}
 

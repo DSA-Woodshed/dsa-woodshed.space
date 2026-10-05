@@ -1,4 +1,4 @@
-// M3.3 sitemap.xml endpoint. Prerendered at build time by adapter-static so the
+// Prerendered by adapter-static so the
 // XML lives at build/sitemap.xml. Add additional routes here as new lanes land.
 import {
 	algorithmParams,
@@ -7,7 +7,7 @@ import {
 	sheetSlugs,
 	SINGLE_PAGE_SECTIONS,
 } from '$lib/docs/registry';
-import { AGENT_ROUTE, PROJECT_ROUTE } from '$lib/navigation';
+import { PROJECT_ROUTE } from '$lib/navigation';
 import type { RequestHandler } from './$types';
 
 const SITE = 'https://dsa-woodshed.space';
@@ -16,13 +16,13 @@ const SITE = 'https://dsa-woodshed.space';
 const PAGES: string[] = [
 	...new Set([
 		'/',
+		'/start',
 		'/library',
 		...SINGLE_PAGE_SECTIONS.map((section) => `/${section}`),
 		'/reference',
 		...sheetSlugs().map((s) => `/reference/${s}`),
 		'/guide/interview-practice-evidence',
 		PROJECT_ROUTE,
-		AGENT_ROUTE,
 		...guideMarkdownSlugs().map((s) => `/guide/${s}`),
 		'/algorithms',
 		...algorithmTopicSlugs().map((t) => `/algorithms/${t}`),

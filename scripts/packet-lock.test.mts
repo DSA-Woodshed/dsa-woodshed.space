@@ -30,6 +30,17 @@ const BOOKLET = {
 		localUrl: `/generated/booklet-${'1'.repeat(64)}.pdf`,
 	},
 };
+const NEXT_BOOKLET = {
+	...BOOKLET,
+	tagName: 'v2.0.0',
+	releaseUrl: `https://github.com/${SOURCE_REPO}/releases/tag/v2.0.0`,
+	asset: {
+		...BOOKLET.asset,
+		digest: `sha256:${'2'.repeat(64)}`,
+		downloadUrl: `https://github.com/${SOURCE_REPO}/releases/download/v2.0.0/booklet.pdf`,
+		localUrl: `/generated/booklet-${'2'.repeat(64)}.pdf`,
+	},
+};
 
 const git = (cwd: string, args: string[]) =>
 	execFileSync('git', ['-C', cwd, '-c', 'commit.gpgsign=false', ...args], {
@@ -153,18 +164,19 @@ describe('packet revision lock', () => {
 		const manifestPath = path.join(site, 'src/content/.manifest.json');
 		write(site, 'src/content/.manifest.json', manifest(commitA));
 		write(site, 'src/content/guide/body.md', 'old body\n');
-		write(site, 'static/agent-map.md', 'old map\n');
+		write(site, 'static/capabilities.json', 'old map\n');
 		write(site, 'static/generated/booklet-old.pdf', 'old booklet\n');
 
 		expect(() =>
 			advancePacketLock(commitB, {
 				packetPath: packet,
 				manifestPath,
+				bookletMetadata: NEXT_BOOKLET,
 				verifyPublished: () => commitB,
 				runSync: () => {
 					write(site, 'src/content/.manifest.json', manifest(commitB));
 					write(site, 'src/content/guide/body.md', 'partial body\n');
-					write(site, 'static/agent-map.md', 'partial map\n');
+					write(site, 'static/capabilities.json', 'partial map\n');
 					write(site, 'static/generated/booklet-new.pdf', 'partial booklet\n');
 					throw new Error('injected sync failure');
 				},
@@ -173,10 +185,57 @@ describe('packet revision lock', () => {
 
 		expect(readFileSync(manifestPath, 'utf8')).toBe(manifest(commitA));
 		expect(readFileSync(path.join(site, 'src/content/guide/body.md'), 'utf8')).toBe('old body\n');
-		expect(readFileSync(path.join(site, 'static/agent-map.md'), 'utf8')).toBe('old map\n');
+		expect(readFileSync(path.join(site, 'static/capabilities.json'), 'utf8')).toBe('old map\n');
 		expect(readFileSync(path.join(site, 'static/generated/booklet-old.pdf'), 'utf8')).toBe('old booklet\n');
 		expect(() => readFileSync(path.join(site, 'static/generated/booklet-new.pdf'), 'utf8')).toThrow();
 		expect(() => readFileSync(path.join(site, '.packet-lock.transaction'), 'utf8')).toThrow();
+	});
+
+	it('can advance only the verified printable input while preserving the exact packet revision', () => {
+		const packet = makePacketFixture();
+		const commit = git(packet, ['rev-parse', 'HEAD']);
+		const site = mkdtempSync(path.join(tmpdir(), 'woodshed-lock-printable-'));
+		temporaryRoots.push(site);
+		const manifestPath = path.join(site, 'src/content/.manifest.json');
+		write(site, 'src/content/.manifest.json', manifest(commit));
+
+		const { oldLock, newLock } = advancePacketLock(commit, {
+			packetPath: packet,
+			manifestPath,
+			bookletMetadata: NEXT_BOOKLET,
+			verifyPublished: () => commit,
+			runSync: () => {
+				const requested = readPacketLock(manifestPath);
+				expect(requested.sourceCommit).toBe(commit);
+				expect(requested.booklet).toEqual(NEXT_BOOKLET);
+			},
+		});
+		expect(oldLock.booklet).toEqual(BOOKLET);
+		expect(newLock.sourceCommit).toBe(commit);
+		expect(newLock.booklet).toEqual(NEXT_BOOKLET);
+	});
+
+	it('restores the old lock if sync changes printable provenance while keeping its requested digest', () => {
+		const packet = makePacketFixture();
+		const commit = git(packet, ['rev-parse', 'HEAD']);
+		const site = mkdtempSync(path.join(tmpdir(), 'woodshed-lock-provenance-'));
+		temporaryRoots.push(site);
+		const manifestPath = path.join(site, 'src/content/.manifest.json');
+		write(site, 'src/content/.manifest.json', manifest(commit));
+		expect(() =>
+			advancePacketLock(commit, {
+				packetPath: packet,
+				manifestPath,
+				bookletMetadata: NEXT_BOOKLET,
+				verifyPublished: () => commit,
+				runSync: () => {
+					const changed = JSON.parse(readFileSync(manifestPath, 'utf8'));
+					changed.booklet.tagName = 'other-release';
+					writeFileSync(manifestPath, JSON.stringify(changed));
+				},
+			}),
+		).toThrow('content sync changed the requested booklet metadata');
+		expect(readFileSync(manifestPath, 'utf8')).toBe(manifest(commit));
 	});
 
 	it('fails closed when another lock transaction is active', () => {

@@ -3,38 +3,31 @@
 	"repo": {
 		"name": "dsa-woodshed.space",
 		"domain": "dsa-woodshed.space",
-		"description": "The DSA Woodshed — a static SvelteKit reading surface for the DSA study packet."
+		"description": "The DSA Woodshed \u2014 a static SvelteKit reading surface for the DSA study packet.",
+		"owner": "DSA-Woodshed"
 	},
 	"profile": {
-		"kind": "custom-public-standalone",
-		"derived_from": "tinyland-inc/site.scaffold",
-		"adoption": "selective",
-		"selective_audit_status": "pending-release",
-		"selective_audit_after": "v0.4.0",
-		"selective_audit_outcomes": ["adopt", "adapt", "reject"]
+		"kind": "public-scaffold-consumer",
+		"derived_from": "xoxd-ai/site.scaffold",
+		"revision": "88b68e6f404a202902443f0a245f6a36cb8e651e",
+		"adoption": "full-public-build-and-chrome"
 	},
 	"taxonomy": {
-		"primary_role": "static-site",
+		"primary_role": "static-spoke",
 		"layers": ["static-site", "content-sync-consumer", "sveltekit-adapter-static"]
 	},
 	"content": {
-		"authority_repo": "Jesssullivan/dsa-study-packet",
+		"authority_repo": "DSA-Woodshed/dsa-study-packet",
 		"note": "Prose and reference sheets are authored in the study-packet repo and rendered here. Edit/view links resolve there (see src/lib/repo.ts)."
 	},
 	"tooling": {
 		"front_door": "just",
-		"canonical_build": "pnpm-vite",
-		"bazel_role": "module-graph-and-package-pin-proof-only"
-	},
-	"agent_handoff": {
-		"owner_repo": "Jesssullivan/dsa-woodshed.space",
-		"machine_map_authority_repo": "Jesssullivan/dsa-study-packet",
-		"public_surfaces": ["/agent", "/llms.txt", "/agent-map.md"],
-		"inherits_scaffold_marketplace": false
+		"canonical_build": "bazel",
+		"bazel_role": "build-check-test-and-package"
 	},
 	"execution_evidence": {
 		"github_actions_capability": "ubuntu-latest",
-		"runner_pickup": "github-hosted-ownership-migration-bridge",
+		"runner_pickup": "github-hosted",
 		"gf_consumer_enrollment": "unproved",
 		"gf_shared_cache": "unproved",
 		"gf_reapi_rbe": "unproved"

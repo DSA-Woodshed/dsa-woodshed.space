@@ -1,7 +1,3 @@
-# PR / main gate: the same suite the repo runs locally (svelte-check, prettier
-# + eslint, vitest, full build with the pagefind postbuild verifier, playwright
-# overflow e2e). Content comes from the packet repo exactly as deploy-pages.yml
-# gets it — the packet is public, no checkout credential needed.
 name: ci
 
 on:
@@ -19,96 +15,38 @@ concurrency:
 jobs:
   gates:
     name: check / lint / unit / build / e2e
-    # Temporary ownership-migration bridge: keep the complete browser matrix
-    # independent of personal ARC while repository ownership moves.
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '22'
-
+      - uses: DeterminateSystems/nix-installer-action@v21
       - name: Read the committed packet lock
         id: packet-lock
-        run: node scripts/packet-lock.mjs --github-output
-
+        run: nix develop --command node scripts/packet-lock.mjs --github-output
       - name: Check out the study packet
         uses: actions/checkout@v7
         with:
           repository: ${{ steps.packet-lock.outputs.repository }}
           ref: ${{ steps.packet-lock.outputs.commit }}
           path: dsa-study-packet
-
       - name: Verify the locked packet checkout
-        run: node scripts/packet-lock.mjs --verify-checkout "${{ github.workspace }}/dsa-study-packet"
-
-      # Pin both the installer action and command version so the public front
-      # door does not depend on runner-image contents.
-      - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
-        with:
-          just-version: '1.57.0'
-
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 10.13.1
-
-      - run: pnpm install --frozen-lockfile
-
+        run: nix develop --command node scripts/packet-lock.mjs --verify-checkout "${{ github.workspace }}/dsa-study-packet"
+      - name: Install public dependencies
+        run: nix develop --command just setup
       - name: Sync content from the packet
-        run: pnpm run sync-content
+        run: nix develop --command just sync-content
         env:
-          GITHUB_TOKEN: ${{ github.token }}
           WOODSHED_PACKET_PATH: ${{ github.workspace }}/dsa-study-packet
-
       - name: Verify the packet lock reproduced exactly
         run: |
-          node scripts/packet-lock.mjs --verify-generated \
+          nix develop --command node scripts/packet-lock.mjs --verify-generated \
             "${{ steps.packet-lock.outputs.repository }}" \
             "${{ steps.packet-lock.outputs.commit }}" \
             "${{ steps.packet-lock.outputs.booklet_digest }}"
-          git diff --exit-code -- src/content/.manifest.json static/agent-map.md
-
-      # Run the public test front door before svelte-check has generated
-      # .svelte-kit metadata. This keeps the cold-checkout contract observable.
-      - name: Test from a cold SvelteKit checkout
-        run: |
-          test ! -e .svelte-kit/tsconfig.json
-          just test
+          git diff --exit-code -- src/content/.manifest.json static/capabilities.json
+      - name: Run the public validation graph
+        run: nix develop .#playwright --command just gate
         env:
-          GITHUB_TOKEN: ${{ github.token }}
           WOODSHED_PACKET_PATH: ${{ github.workspace }}/dsa-study-packet
-
-      - run: pnpm run check
-      - run: pnpm run lint
-
-      - name: Install playwright chromium
-        # Mermaid SSR uses Chromium during build and Playwright reuses it for
-        # the browser matrix. GitHub-hosted runners install matching system libs.
-        run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm run build
-      - run: pnpm run test:e2e
-
-  bazel-graph:
-    # Registry-resolution proof (the GFTB scaffold's bazel-graph smoke):
-    # `bazelisk mod graph` resolves MODULE.bazel through the two-registry
-    # chain in .bazelrc (tinyland-inc/bazel-registry first, then BCR),
-    # proving the @tummycrypt bazel_deps — including tummycrypt_tinyvectors,
-    # whose npm-lane pin is the registry's own source tag archive — stay
-    # resolvable. Version parity with package.json is enforced separately by
-    # scripts/check-inhouse-package-parity.py inside `pnpm run lint`.
-    name: bazel mod graph
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '22'
-
-      - name: bazelisk mod graph
-        # bazelisk via npm keeps the runner image dependency-free; it
-        # downloads the Bazel pinned by .bazelversion.
-        run: npx --yes @bazel/bazelisk@1.26.0 --output_user_root="${RUNNER_TEMP}/site-scaffold-bazel-user-root" mod graph
+      - name: Browser acceptance
+        run: nix develop .#playwright --command pnpm exec playwright test

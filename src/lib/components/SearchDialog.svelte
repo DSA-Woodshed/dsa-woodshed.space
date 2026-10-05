@@ -128,7 +128,7 @@
 			     the title/description ids, and only names the dialog when a title
 			     element actually renders. Both must exist (visually hidden) or
 			     the prerendered HTML carries dangling refs and the open dialog is a
-			     nameless modal. Same Dialog.Title idiom as BindableDrawer. -->
+			     nameless modal. The dialog has its own accessible title. -->
 			<Dialog.Title class="sr-only">Search the Woodshed</Dialog.Title>
 			<Dialog.Description class="sr-only">
 				Search the Woodshed library and practice material. Results update as you type.

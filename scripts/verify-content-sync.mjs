@@ -1,4 +1,4 @@
-// Fail a build when generated packet bodies, the served agent map, and the
+// Fail a build when generated packet bodies, the served capability inventory, and the
 // committed manifest no longer describe the same sync result. This catches an
 // interrupted or manually edited sync before Vite can publish misattributed
 // content.
@@ -30,14 +30,15 @@ export function verifyContentSync(repoRoot = DEFAULT_REPO_ROOT) {
 	if (!/^[0-9a-f]{40}$/.test(manifest.sourceCommit ?? '')) {
 		throw new Error('verify-content-sync: manifest sourceCommit is not a full Git commit SHA');
 	}
-	if (!manifest.agentMap || !Array.isArray(manifest.entries)) {
-		throw new Error('verify-content-sync: manifest is missing agentMap or entries');
+	if (manifest.schemaVersion !== 2) throw new Error('verify-content-sync: schemaVersion must be 2');
+	if (!manifest.capabilities || !Array.isArray(manifest.entries)) {
+		throw new Error('verify-content-sync: manifest is missing capabilities or entries');
 	}
 
-	const agentMapPath = containedPath(repoRoot, manifest.agentMap.out, 'agent map output');
-	const agentMap = readFileSync(agentMapPath, 'utf8');
-	if (sha256(agentMap) !== manifest.agentMap.sha256) {
-		throw new Error(`verify-content-sync: digest mismatch for ${manifest.agentMap.out}`);
+	const capabilitiesPath = containedPath(repoRoot, manifest.capabilities.out, 'capability inventory output');
+	const capabilities = readFileSync(capabilitiesPath, 'utf8');
+	if (sha256(capabilities) !== manifest.capabilities.sha256) {
+		throw new Error(`verify-content-sync: digest mismatch for ${manifest.capabilities.out}`);
 	}
 
 	for (const entry of manifest.entries) {
@@ -51,13 +52,13 @@ export function verifyContentSync(repoRoot = DEFAULT_REPO_ROOT) {
 	return {
 		sourceCommit: manifest.sourceCommit,
 		entries: manifest.entries.length,
-		agentMap: manifest.agentMap.out,
+		capabilities: manifest.capabilities.out,
 	};
 }
 
 if (resolve(process.argv[1] ?? '') === THIS_FILE) {
 	const result = verifyContentSync();
 	console.log(
-		`verify-content-sync: OK: ${result.entries} entries and ${result.agentMap} match packet ${result.sourceCommit.slice(0, 12)}`,
+		`verify-content-sync: OK: ${result.entries} entries and ${result.capabilities} match packet ${result.sourceCommit.slice(0, 12)}`,
 	);
 }

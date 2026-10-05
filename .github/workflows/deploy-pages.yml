@@ -1,28 +1,8 @@
 name: Deploy to GitHub Pages
 
-# Live push-to-main and daily content-refresh deploy for
-# https://dsa-woodshed.space (custom domain via static/CNAME, so the build uses
-# base="" / no BASE_PATH). Plain pnpm + adapter-static build published to
-# GitHub Pages.
-#
-# RUNNERS: jobs temporarily use GitHub-hosted runners as a bounded ownership-
-# migration bridge. This keeps the full production/browser proof independent
-# of personal ARC; it is not evidence of GloriousFlywheel enrollment or RBE.
-#
-# CONTENT SYNC: src/content is generated — a fresh checkout carries only the
-# committed .manifest.json, and `pnpm run build` does NOT sync, so the build
-# job below checks out the packet repo and runs `pnpm run sync-content`
-# (the WOODSHED_PACKET_PATH contract in scripts/sync-content.mjs) before
-# building. The packet is PUBLIC (launched 2026-07-09), so the checkout
-# needs no credential — the default GITHUB_TOKEN suffices.
-
 on:
   push:
     branches: [main]
-  # Packet changes do not move this repository's lock. A conservative daily
-  # deployment canaries reproducibility of the committed site/packet pair.
-  schedule:
-    - cron: '17 8 * * *'
   workflow_dispatch:
 
 permissions:
@@ -34,78 +14,49 @@ concurrency:
 
 jobs:
   build:
+    if: github.repository == 'DSA-Woodshed/dsa-woodshed.space' && github.ref == 'refs/heads/main'
     name: Build static site
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '22'
-
+      - uses: DeterminateSystems/nix-installer-action@v21
       - name: Read the committed packet lock
         id: packet-lock
-        run: node scripts/packet-lock.mjs --github-output
-
-      # Content source: the public study packet. The site renders content
-      # synced from it; without this checkout + the sync step below, the
-      # $content imports cannot resolve and the build is guaranteed red.
+        run: nix develop --command node scripts/packet-lock.mjs --github-output
       - name: Check out the study packet
         uses: actions/checkout@v7
         with:
           repository: ${{ steps.packet-lock.outputs.repository }}
           ref: ${{ steps.packet-lock.outputs.commit }}
           path: dsa-study-packet
-
       - name: Verify the locked packet checkout
-        run: node scripts/packet-lock.mjs --verify-checkout "${{ github.workspace }}/dsa-study-packet"
-
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 10.13.1
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Sync content from the study packet
-        run: pnpm run sync-content
+        run: nix develop --command node scripts/packet-lock.mjs --verify-checkout "${{ github.workspace }}/dsa-study-packet"
+      - name: Install public dependencies
+        run: nix develop --command just setup
+      - name: Sync content from the packet
+        run: nix develop --command just sync-content
         env:
-          GITHUB_TOKEN: ${{ github.token }}
           WOODSHED_PACKET_PATH: ${{ github.workspace }}/dsa-study-packet
-
       - name: Verify the packet lock reproduced exactly
         run: |
-          node scripts/packet-lock.mjs --verify-generated \
+          nix develop --command node scripts/packet-lock.mjs --verify-generated \
             "${{ steps.packet-lock.outputs.repository }}" \
             "${{ steps.packet-lock.outputs.commit }}" \
             "${{ steps.packet-lock.outputs.booklet_digest }}"
-          git diff --exit-code -- src/content/.manifest.json static/agent-map.md
-
-      - name: Install playwright chromium
-        # Must precede the build: mermaid-isomorphic renders diagrams through
-        # this browser at build time and falls back to source otherwise.
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Build static site (custom domain, base="")
-        run: pnpm run build
+          git diff --exit-code -- src/content/.manifest.json static/capabilities.json
+      - name: Build the exact public artifact
+        run: nix develop .#playwright --command just build-ci
         env:
-          NODE_ENV: production
-
-      - name: Write exact deployment receipt
-        run: node scripts/deployment-receipt.mjs --write build/deployment-receipt.json "${{ github.sha }}"
-
+          BUILD_COMMIT_SHA: ${{ github.sha }}
+          WOODSHED_PACKET_PATH: ${{ github.workspace }}/dsa-study-packet
       - uses: actions/upload-pages-artifact@v5
         with:
           path: build
-          # v4 started excluding dotfiles from the artifact by default; the
-          # build ships static/.nojekyll (copied verbatim by adapter-static)
-          # so GitHub Pages skips Jekyll processing, which otherwise ignores
-          # the underscore-prefixed _app/ directory SvelteKit ships assets
-          # under. Without this the deployed site 404s on every asset.
           include-hidden-files: true
 
   deploy:
+    if: github.repository == 'DSA-Woodshed/dsa-woodshed.space' && github.ref == 'refs/heads/main'
     name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
@@ -119,24 +70,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
-
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
-
       - name: Refuse an out-of-date main deployment
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           current_main="$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)"
-          test "$current_main" = "$GITHUB_SHA" || {
-            echo "refusing stale Pages deployment: run=$GITHUB_SHA main=$current_main" >&2
-            exit 1
-          }
-
+          test "$current_main" = "$GITHUB_SHA"
       - uses: actions/deploy-pages@v5
         id: deployment
-
       - name: Verify production serves this exact site and packet pair
         run: |
           node scripts/deployment-receipt.mjs --verify-url \
