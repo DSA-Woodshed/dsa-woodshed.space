@@ -141,8 +141,12 @@
 					{#if command}
 						<div class="bg-surface-100-900 space-y-3 rounded-md p-4">
 							<p class="text-sm">
-								Open the Woodshed, then paste this command into its terminal. Your editor session will use the same
-								choices.
+								{#if mode === 'contribute'}
+									Fork the study packet into your own account, open your fork's Codespace, then paste this command into
+									its terminal.
+								{:else}
+									Open the basic Woodshed Codespace, then paste this command into its terminal to use these choices.
+								{/if}
 							</p>
 							<code data-testid="session-start-command" class="block break-all text-sm">{command}</code><button
 								type="button"
@@ -150,12 +154,20 @@
 								onclick={copyCommand}>{copied ? 'Copied' : 'Copy command'}</button
 							>
 						</div>
-						<a
-							class="btn preset-filled-primary-500"
-							href={`https://codespaces.new/${REPO_SLUG}?quickstart=1`}
-							target="_blank"
-							rel="noopener">Open in Codespaces</a
-						>
+						{#if mode === 'contribute'}
+							<a class="btn preset-filled-primary-500" href={`${REPO_URL}/fork`} target="_blank" rel="noopener"
+								>Fork the study packet</a
+							>
+							<a class="block underline" href={`${REPO_URL}/blob/${sourceCommit}/CONTRIBUTING.md`}>Contribution guide</a
+							>
+						{:else}
+							<a
+								class="btn preset-filled-primary-500"
+								href={`https://codespaces.new/${REPO_SLUG}?quickstart=1`}
+								target="_blank"
+								rel="noopener">Open basic Codespace</a
+							>
+						{/if}
 					{:else if !validMinutes}<p role="alert">Choose a budget from 1 to {MAX_SESSION_MINUTES} minutes.</p>{/if}
 					<details class="text-surface-700-300 space-y-3 text-sm">
 						<summary class="cursor-pointer font-medium">Continue or close an existing session</summary>
@@ -168,15 +180,20 @@
 						</p>
 					</details>
 					<details class="text-surface-700-300 space-y-3 text-sm">
-						<summary class="cursor-pointer font-medium">Optional protected services</summary>
+						<summary class="cursor-pointer font-medium">Optional managed seat</summary>
 						<p>
-							This site cannot check your workspace's identity or secret federation. Public study and practice need no
-							private credentials.
+							Public study and practice need no private credentials. This site cannot check whether a managed seat is
+							available to you.
 						</p>
 						<p>
-							If you choose protected services, run <code>just protected-capability</code> in your workspace. It reports unavailable
-							(exit 78) unless an independently installed adapter admits that runtime.
+							If you choose a managed seat, follow its supported setup, then run <code>just protected-capability</code>
+							in that workspace. It validates local runtime bindings through an independently installed adapter; it does not
+							verify issuer access, withdrawal, or IDE availability. An absent or unadmitted adapter reports unavailable (exit
+							78).
 						</p>
+						<a class="block underline" href={`${REPO_URL}/blob/${sourceCommit}/docs/guide/portable-environment.md`}
+							>Portable environment and protected-service guidance</a
+						>
 					</details>
 				</form>
 			</Dialog.Content>

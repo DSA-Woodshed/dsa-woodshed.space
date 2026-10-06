@@ -53,6 +53,7 @@ for (const width of [1280, 390]) {
 		await pageLauncher.click();
 		await expect(chooser.getByTestId('session-start-command')).toHaveText(command);
 		await page.keyboard.press('Escape');
+		await expect(chooser).toBeHidden();
 		await expect(pageLauncher).toBeFocused();
 		if (width < 1024) await page.getByRole('button', { name: 'Open navigation' }).click();
 		const navLauncher = page.getByRole('button', { name: 'Start', exact: true });
@@ -106,7 +107,7 @@ test('guided session uses the published inventory and chosen budget', async ({ p
 	await expect(chooser.getByTestId('session-start-command')).toHaveText(
 		`just session start ${capability.id} --mode study --minutes 15`,
 	);
-	await expect(chooser.getByRole('link', { name: 'Open in Codespaces' })).toHaveAttribute(
+	await expect(chooser.getByRole('link', { name: 'Open basic Codespace' })).toHaveAttribute(
 		'href',
 		'https://codespaces.new/DSA-Woodshed/dsa-study-packet?quickstart=1',
 	);
@@ -129,7 +130,7 @@ test('guided session uses the published inventory and chosen budget', async ({ p
 	await expect(chooser.getByRole('alert')).toHaveText('Choose a budget from 1 to 1440 minutes.');
 	await chooser.getByLabel('Custom minutes').fill('0');
 	await expect(chooser.getByRole('alert')).toHaveText('Choose a budget from 1 to 1440 minutes.');
-	await expect(chooser.getByRole('link', { name: 'Open in Codespaces' })).toHaveCount(0);
+	await expect(chooser.getByRole('link', { name: 'Open basic Codespace' })).toHaveCount(0);
 	await page.keyboard.press('Escape');
 	await expect(chooser).toBeHidden();
 	await page.getByRole('button', { name: 'Start', exact: true }).click();
@@ -204,10 +205,10 @@ test('every offered mode uses the published options and protected services stay 
 	await expect(chooser.locator('code').filter({ hasText: /^just session current$/ })).toBeVisible();
 	await expect(chooser.locator('code').filter({ hasText: /^just session resume$/ })).toBeVisible();
 	await expect(chooser.locator('code').filter({ hasText: /^just session finish "one correction"$/ })).toBeVisible();
-	await chooser.getByText('Optional protected services', { exact: true }).click();
+	await chooser.getByText('Optional managed seat', { exact: true }).click();
 	await expect(chooser.locator('code').filter({ hasText: /^just protected-capability$/ })).toBeVisible();
-	await expect(chooser.locator('details').filter({ hasText: 'Optional protected services' })).toContainText(
-		'It reports unavailable (exit 78)',
+	await expect(chooser.locator('details').filter({ hasText: 'Optional managed seat' })).toContainText(
+		'unavailable (exit 78)',
 	);
 });
 
@@ -222,3 +223,87 @@ test('shared theme choice survives a reload', async ({ page }) => {
 	await page.reload();
 	await expect(page.locator('html')).toHaveAttribute('data-mode', 'light');
 });
+
+for (const width of [1280, 390]) {
+	test(`basic practice and contributing elect distinct source handoffs at ${width}px`, async ({
+		page,
+		context,
+		request,
+	}) => {
+		await page.setViewportSize({ width, height: 900 });
+		const inventory = await (await request.get('/capabilities.json')).json();
+		const receipt = await (await request.get('/deployment-receipt.json')).json();
+		const study = inventory.capabilities.find(
+			(entry: { availability: string; modes: string[] }) =>
+				entry.availability === 'available' && entry.modes.includes('study'),
+		);
+		const contribution = inventory.capabilities.find(
+			(entry: { availability: string; modes: string[] }) =>
+				entry.availability === 'available' && entry.modes.includes('contribute'),
+		);
+		const basicUrl = 'https://codespaces.new/DSA-Woodshed/dsa-study-packet?quickstart=1';
+		const forkUrl = 'https://github.com/DSA-Woodshed/dsa-study-packet/fork';
+		// Admit only the elected destination. No provider, login, or seat creation occurs.
+		for (const destination of [basicUrl, forkUrl]) {
+			await context.route(destination, (route) =>
+				route.fulfill({ status: 200, contentType: 'text/html', body: '<h1>Elected source handoff</h1>' }),
+			);
+		}
+		await page.goto('/start');
+		const chooser = page.getByRole('dialog', { name: 'Choose your session' });
+		await expect(chooser).toBeVisible();
+		const intent = chooser.getByLabel('What would you like to do?');
+		const activity = chooser.getByLabel('Choose something to work on');
+		const basic = chooser.getByRole('link', { name: 'Open basic Codespace', exact: true });
+		const fork = chooser.getByRole('link', { name: 'Fork the study packet', exact: true });
+		await activity.selectOption(study.id);
+		await chooser.getByLabel('Custom minutes').fill('45');
+		await expect(basic).toHaveAttribute('href', basicUrl);
+		await expect(fork).toHaveCount(0);
+		await chooser.getByText('Optional managed seat', { exact: true }).click();
+		const optional = chooser.locator('details').filter({ hasText: 'Optional managed seat' });
+		await expect(optional).toContainText('Public study and practice need no private credentials.');
+		await expect(optional).toContainText('This site cannot check whether a managed seat is available to you.');
+		await expect(optional).toContainText('does not verify issuer access, withdrawal, or IDE availability');
+		await expect(
+			optional.getByRole('link', { name: 'Portable environment and protected-service guidance' }),
+		).toHaveAttribute(
+			'href',
+			`https://github.com/DSA-Woodshed/dsa-study-packet/blob/${receipt.packetCommit}/docs/guide/portable-environment.md`,
+		);
+		await expect(chooser.getByTestId('session-start-command')).toHaveText(
+			`just session start ${study.id} --mode study --minutes 45`,
+		);
+		await basic.focus();
+		const basicOpened = context.waitForEvent('page');
+		await page.keyboard.press('Enter');
+		const basicPage = await basicOpened;
+		await expect(basicPage).toHaveURL(basicUrl);
+		await expect(basicPage.getByRole('heading', { name: 'Elected source handoff' })).toBeVisible();
+		await basicPage.close();
+		await intent.selectOption('contribute');
+		await activity.selectOption(contribution.id);
+		await expect(basic).toHaveCount(0);
+		await expect(fork).toHaveAttribute('href', forkUrl);
+		await expect(chooser.getByRole('link', { name: 'Contribution guide', exact: true })).toHaveAttribute(
+			'href',
+			`https://github.com/DSA-Woodshed/dsa-study-packet/blob/${receipt.packetCommit}/CONTRIBUTING.md`,
+		);
+		await expect(chooser.getByTestId('session-start-command')).toHaveText(
+			`just session start ${contribution.id} --mode contribute --minutes 45`,
+		);
+		await fork.focus();
+		const forkOpened = context.waitForEvent('page');
+		await page.keyboard.press('Enter');
+		const forkPage = await forkOpened;
+		await expect(forkPage).toHaveURL(forkUrl);
+		await expect(forkPage.getByRole('heading', { name: 'Elected source handoff' })).toBeVisible();
+		await forkPage.close();
+		await intent.selectOption('study');
+		await activity.selectOption(study.id);
+		await expect(basic).toHaveAttribute('href', basicUrl);
+		await expect(chooser.getByTestId('session-start-command')).toHaveText(
+			`just session start ${study.id} --mode study --minutes 45`,
+		);
+	});
+}
