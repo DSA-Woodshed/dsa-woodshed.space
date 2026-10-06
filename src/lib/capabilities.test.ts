@@ -47,4 +47,15 @@ describe('canonical session command handoff', () => {
 			`just session start ${algorithm.id} --mode study --minutes 15`,
 		);
 	});
+
+	it('keeps command eligibility intact when a consumer mutates the exported modes array', () => {
+		const originalModes = [...reading.modes];
+		try {
+			reading.modes.push('implement');
+			expect(() => sessionCommand(reading, 'implement', 15)).toThrow(/supported mode/);
+			expect(sessionCommand(reading, 'read', 15)).toBe(`just session start ${reading.id} --mode read --minutes 15`);
+		} finally {
+			reading.modes.splice(0, reading.modes.length, ...originalModes);
+		}
+	});
 });
