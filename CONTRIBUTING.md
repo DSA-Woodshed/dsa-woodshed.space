@@ -6,7 +6,8 @@ adapted from the Great Falls Tool Bus fork-first contribution model.
 Fork `DSA-Woodshed/dsa-woodshed.space`, clone your fork as `origin`, and add the
 org repository as `upstream`. For Jess, the preserved personal fork is
 `Jesssullivan/dsa-woodshed.space-contrib`. Push contribution branches to your
-fork and open a pull request to org `main`. Changes land through squash review.
+fork and open a pull request to org `main`. Reviewed merge commits preserve the
+signed source commits from the fork branch.
 
 ```sh
 git remote add upstream https://github.com/DSA-Woodshed/dsa-woodshed.space.git
