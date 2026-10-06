@@ -41,6 +41,12 @@ for (const width of [1280, 390]) {
 		);
 		await page.goto('/start');
 		const chooser = page.getByRole('dialog', { name: 'Choose your session' });
+		const closeChooser = async () => {
+			await expect(chooser).toBeVisible();
+			await expect.poll(() => chooser.evaluate((dialog) => dialog.contains(document.activeElement))).toBe(true);
+			await page.keyboard.press('Escape');
+			await expect(chooser).toBeHidden();
+		};
 		await expect(chooser).toHaveCount(1);
 		await chooser.getByLabel('What would you like to do?').selectOption('implement');
 		await chooser.getByLabel('Choose something to work on').selectOption(capability.id);
@@ -48,19 +54,18 @@ for (const width of [1280, 390]) {
 		await chooser.getByRole('checkbox', { name: "I'm ready to move from study to candidate work" }).check();
 		const command = `just session start ${capability.id} --mode implement --minutes 45 --ready`;
 		await expect(chooser.getByTestId('session-start-command')).toHaveText(command);
-		await page.keyboard.press('Escape');
+		await closeChooser();
 		const pageLauncher = page.getByRole('button', { name: 'Choose a session', exact: true });
 		await pageLauncher.click();
 		await expect(chooser.getByTestId('session-start-command')).toHaveText(command);
-		await page.keyboard.press('Escape');
-		await expect(chooser).toBeHidden();
+		await closeChooser();
 		await expect(pageLauncher).toBeFocused();
 		if (width < 1024) await page.getByRole('button', { name: 'Open navigation' }).click();
 		const navLauncher = page.getByRole('button', { name: 'Start', exact: true });
 		await navLauncher.click();
 		await expect(chooser).toHaveCount(1);
 		await expect(chooser.getByTestId('session-start-command')).toHaveText(command);
-		await page.keyboard.press('Escape');
+		await closeChooser();
 		await expect(width < 1024 ? page.getByRole('button', { name: 'Open navigation' }) : navLauncher).toBeFocused();
 		if (width < 1024) await page.getByRole('button', { name: 'Open navigation' }).click();
 		const navigation =
@@ -72,7 +77,7 @@ for (const width of [1280, 390]) {
 		if (width < 1024) await page.getByRole('button', { name: 'Open navigation' }).click();
 		await navLauncher.click();
 		await expect(chooser.getByTestId('session-start-command')).toHaveText(command);
-		await page.keyboard.press('Escape');
+		await closeChooser();
 		await page.getByRole('link', { name: 'Choose a session', exact: true }).click();
 		await expect(chooser.getByTestId('session-start-command')).toHaveText(command);
 	});
