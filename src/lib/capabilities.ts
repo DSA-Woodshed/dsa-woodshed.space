@@ -17,14 +17,20 @@ export interface CapabilityInventory {
 declare const __CAPABILITY_INVENTORY__: CapabilityInventory;
 export const capabilities = __CAPABILITY_INVENTORY__.capabilities;
 export const availableCapabilities = capabilities.filter((capability) => capability.availability === 'available');
+export const MAX_SESSION_MINUTES = 1440;
 
-export function sessionCommand(capability: Capability, mode: string, minutes: number): string {
+export function sessionCommand(capability: Capability, mode: string, minutes: number, ready = false): string {
 	if (!availableCapabilities.some((entry) => entry.id === capability.id) || !capability.modes.includes(mode)) {
 		throw new Error('Choose an available capability and supported mode.');
 	}
-	if (!Number.isSafeInteger(minutes) || minutes < 1 || minutes > 480) throw new Error('Choose 1–480 minutes.');
+	if (!Number.isSafeInteger(minutes) || minutes < 1 || minutes > MAX_SESSION_MINUTES) {
+		throw new Error(`Choose 1–${MAX_SESSION_MINUTES} minutes.`);
+	}
+	if (ready && !['implement', 'tests-first'].includes(mode)) {
+		throw new Error('Choose readiness only when moving to candidate work.');
+	}
 	if (!/^[a-z0-9][a-z0-9_./-]*$/.test(capability.id) || !/^[a-z-]+$/.test(mode)) {
 		throw new Error('The catalog contains an invalid session identifier.');
 	}
-	return `just session start ${capability.id} --mode ${mode} --minutes ${minutes}`;
+	return `just session start ${capability.id} --mode ${mode} --minutes ${minutes}${ready ? ' --ready' : ''}`;
 }
