@@ -1,5 +1,36 @@
 import { expect, test } from '@playwright/test';
 
+test('session choices wait for working controls when application hydration is delayed', async ({ page, request }) => {
+	const inventory = await (await request.get('/capabilities.json')).json();
+	const capability = inventory.capabilities.find(
+		(entry: { availability: string; modes: string[] }) =>
+			entry.availability === 'available' && entry.modes.includes('study'),
+	);
+	let releaseScripts!: () => void;
+	const scriptsReady = new Promise<void>((resolve) => {
+		releaseScripts = resolve;
+	});
+	await page.route('**/_app/immutable/**/*.js', async (route) => {
+		await scriptsReady;
+		await route.continue();
+	});
+	await page.goto('/start', { waitUntil: 'domcontentloaded' });
+	const chooser = page.getByRole('dialog', { name: 'Choose your session' });
+	try {
+		await expect(page.getByRole('heading', { name: 'Make time for a rep' })).toBeVisible();
+		const earlyActivity = chooser.getByLabel('Choose something to work on');
+		if (await earlyActivity.count()) await expect(earlyActivity).toBeDisabled();
+	} finally {
+		releaseScripts();
+	}
+	await expect(chooser).toBeVisible();
+	await chooser.getByLabel('Choose something to work on').selectOption(capability.id);
+	await chooser.getByRole('button', { name: '15 minutes', exact: true }).click();
+	await expect(chooser.getByTestId('session-start-command')).toHaveText(
+		`just session start ${capability.id} --mode study --minutes 15`,
+	);
+});
+
 for (const width of [1280, 390]) {
 	test(`one chooser keeps the elected session across launchers and routes at ${width}px`, async ({ page, request }) => {
 		await page.setViewportSize({ width, height: 900 });

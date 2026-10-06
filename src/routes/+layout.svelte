@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setContext } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import { page } from '$app/state';
 	import { PublicNavigation, SiteFooter } from '@xoxd/public-chrome';
 	import { FOUC_SCRIPT } from '@xoxd/public-chrome/fouc';
@@ -17,6 +17,11 @@
 	let { children } = $props();
 	// Preserve /start's initial-open behavior before the controlled dialog connects.
 	let sessionOpen = $state(page.url.pathname === '/start');
+	// Expose choices only after the client can bind their event handlers.
+	let sessionMounted = $state(false);
+	onMount(() => {
+		sessionMounted = true;
+	});
 	let sessionReturnFocus = $state<HTMLElement | null>(null);
 	function openSessionDialog(trigger?: HTMLElement): void {
 		const active = document.activeElement;
@@ -141,4 +146,6 @@
 		</SiteFooter>
 	</div>
 </div>
-<SessionDialog bind:open={sessionOpen} returnFocus={sessionReturnFocus} />
+{#if sessionMounted}
+	<SessionDialog bind:open={sessionOpen} returnFocus={sessionReturnFocus} />
+{/if}
