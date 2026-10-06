@@ -8,15 +8,17 @@ bazel_output_user_root_flag := `bash scripts/bazel-output-user-root.sh`
 default:
     @just --list
 
-# Install frozen public dependencies and contributor hooks.
+# Install frozen public dependencies and preserve existing contributor settings.
 setup:
+    #!/usr/bin/env bash
+    set -euo pipefail
     pnpm install --frozen-lockfile
     just deps-graph
     just workspace-types
-    git config core.hooksPath .githooks
-    git config remote.pushDefault origin
-    @if git remote | grep -qx upstream; then git remote set-url --push upstream DISABLED-fork-first; fi
-    @if [ "$(git config --get commit.gpgsign || true)" != true ]; then echo 'Configure signed commits; see CONTRIBUTING.md'; fi
+    source .githooks/_lib.sh
+    canonical_repo=$(python3 -c 'import json; r=json.load(open("tinyland.repo.json"))["repo"]; print(r["owner"] + "/" + r["name"])' 2>/dev/null || true)
+    woodshed_install_hooks .githooks "$canonical_repo"
+    if [ "$(git config --get commit.gpgsign || true)" != true ]; then echo 'Configure signed commits; see CONTRIBUTING.md'; fi
 
 # Materialize public graph packages for live workspace commands.
 deps-graph:
@@ -39,7 +41,7 @@ workspace-types:
     python3 scripts/bazel_output.py materialize --source bazel-bin/.svelte-kit --destination .svelte-kit --required-path tsconfig.json
 
 # Compare exact bytes with the immutable public organization mirror.
-hooks-check mirror="https://raw.githubusercontent.com/DSA-Woodshed/.github/83f555ca5cb0ee01fa35cb6947f1b0e80228d332/githooks":
+hooks-check mirror="https://raw.githubusercontent.com/DSA-Woodshed/.github/76f30db016acea5c2de6f0aadd6fca5dc2989904/githooks":
     #!/usr/bin/env bash
     set -euo pipefail
     hook_fixture=$(mktemp -d)

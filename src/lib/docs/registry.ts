@@ -8,18 +8,16 @@
 //   input) plus a committed manifest, src/content/.manifest.json. This registry
 //   reads that manifest for the per-entry facts derived from the source
 //   (title and summary from frontmatter, sourcePath, lane, order), so those
-//   never drift from the packet and are never hand-typed here. Curated summaries
-//   remain below only as a compatibility fallback for older packet commits.
+//   never drift from the packet and are never hand-typed here.
 //
 //   Bodies are NOT imported here: the raw text is loaded lazily by detail routes
 //   via $lib/docs/content.ts, so importing this registry (homepage, section
 //   indexes, sitemap) never pulls sheet text into their bundles.
 //
-//   DEEP NAV / SIDEBAR is deliberately out of scope for this module. A follow-up
-//   IA stream consumes the exported `sections()` / `allEntries()` shape to build
-//   navigation. Keep this file about content identity, not layout.
+//   Navigation consumes the exported `sections()` / `allEntries()` shape.
+//   Keep this file about content identity, not layout.
 import { bookletMetadata } from '$lib/docs/booklet';
-import { REPO_URL, REPO_DEFAULT_BRANCH } from '$lib/repo';
+import { REPO_URL, blobUrl } from '$lib/repo';
 import manifestJson from '$content/.manifest.json';
 
 export type Lane = 'markdown' | 'svx';
@@ -82,40 +80,6 @@ export const sourceCommit = manifest.sourceCommit;
 /** Source and published-path metadata for the generated capability inventory. */
 export const capabilitiesMetadata = manifest.capabilities;
 
-// Compatibility summaries for packet commits that predate source-authored
-// frontmatter descriptions, keyed `${section}/${slug}`.
-const SUMMARIES: Record<string, string> = {
-	// Summaries are consumed as plain text ({entry.summary} card grids, meta
-	// descriptions), so no markdown syntax here; backticks would render literally.
-	'reference/python-stdlib':
-		'collections, itertools, functools, bisect, and heapq: the built-ins to reach for first, with the calls that matter.',
-	'reference/data-structures': 'Operations and Big-O for every Python built-in type, plus trees, graphs, and heaps.',
-	'reference/algorithm-templates':
-		'Copy-ready templates for binary search, two pointers, sliding window, BFS/DFS, backtracking, and DP.',
-	'reference/big-o-complexity': 'Time complexities ranked, input-size rules of thumb, and amortized analysis.',
-	'reference/common-patterns': 'The recurring shapes of interview problems and the move that solves each one.',
-	'reference/system-design': 'Load balancing, caching, message queues, database scaling, and API design.',
-	'reference/interview-day-guide':
-		'Day-of logistics, a communication framework, timing strategy, and what to keep open.',
-	'reference/cross-reference-guide':
-		'Master lookup: problem description to implementation, a decision tree, and a keyword cheat sheet.',
-	'reference/python-314-and-modern-patterns':
-		'PEP 750 t-strings, PEP 649 lazy annotations, PEP 695 type syntax, Hypothesis, and advanced typing.',
-	'reference/whiteboard-performance-protocol':
-		"What's actually scored, the CLARP loop, panic first-aid, and collaboration scripts.",
-	'reference/14-day-whiteboard-ramp': 'A day-by-day schedule: which problems to run and which sheets to keep open.',
-	'guide/interview-practice-evidence':
-		'Why the daily loop is built from cold retrieval, think-aloud reps, observation stress, and tape review instead of passive video.',
-	'guide/getting-started': 'Start an editor rep, write your reasoning in comments, implement, and test.',
-	'guide/when-to-use-what': 'A decision tree mapping a new problem to the pattern that solves it.',
-	'guide/learning-paths': 'Ordered routes through the packet for different timelines and goals.',
-	'guide/source-of-truth': 'How the packet, booklet, and sheets are generated and kept reproducible.',
-	'guide/local-practice':
-		'Run the same editor-first practice loop in local VS Code with a Dev Container or uv and just.',
-	'printables/printables': 'The booklet and reference sheets meant to leave the screen and land on paper.',
-	'challenges/index': 'Practice problems that pair written reasoning with implementation and focused tests.',
-};
-
 export interface Section {
 	id: SectionId;
 	/** Section display title. */
@@ -125,8 +89,7 @@ export interface Section {
 	entries: ContentEntry[];
 }
 
-// Section display metadata. Order here is a sane default; the IA stream owns the
-// final navigation shape.
+// Section display metadata used by the reading navigation.
 const SECTION_META: Record<SectionId, { title: string; order: number }> = {
 	challenges: { title: 'Practice Problems', order: 1 },
 	algorithms: { title: 'Algorithms', order: 3 },
@@ -168,11 +131,9 @@ function toEntry(m: ManifestEntry): ContentEntry {
 	};
 }
 
-/** Prefer source-authored metadata; retain curated prose copy for old manifests. */
+/** Use packet-authored metadata; missing descriptions stay empty. */
 export function resolveEntrySummary(m: Pick<ManifestEntry, 'section' | 'slug' | 'summary'>): string {
-	const sourceSummary = m.summary?.trim();
-	if (sourceSummary) return sourceSummary;
-	return m.section === 'algorithms' ? '' : (SUMMARIES[`${m.section}/${m.slug}`] ?? '');
+	return m.summary?.trim() ?? '';
 }
 
 /** Every content entry, in a stable (section order, then entry order, then slug) sort. */
@@ -371,9 +332,9 @@ function printableAssetUrl(path: string): string | undefined {
  * Build a link resolver for one entry: resolves its relative markdown links
  * against the packet tree, then routes them on-site (entryHref, hash preserved)
  * when the target is a synced entry, else to the canonical GitHub blob URL in
- * the CONTENT repo (anchors and absolute URLs are handled upstream in
- * markdown.ts and never reach here). Repo URL and branch come from $lib/repo.ts,
- * so no org/repo string is hardcoded here.
+ * the CONTENT repo at the locked revision (anchors and absolute URLs are
+ * handled upstream in markdown.ts and never reach here). Repo identity comes
+ * from $lib/repo.ts, so no org/repo string is hardcoded here.
  */
 export function makeLinkResolver(sourcePath: string): (href: string) => string {
 	const dirSegments = sourcePath.split('/').slice(0, -1);
@@ -388,6 +349,6 @@ export function makeLinkResolver(sourcePath: string): (href: string) => string {
 		if (printable) return `${printable}${hash}`;
 		const special = SPECIAL_PACKET_ROUTES.get(resolved);
 		if (special) return `${special}${hash}`;
-		return `${REPO_URL}/blob/${REPO_DEFAULT_BRANCH}/${resolved}${hash}`;
+		return `${blobUrl(resolved, sourceCommit)}${hash}`;
 	};
 }

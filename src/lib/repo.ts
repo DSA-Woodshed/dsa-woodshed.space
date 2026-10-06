@@ -27,8 +27,8 @@ export function editUrl(sourcePath: string): string {
 	return `${REPO_URL}/edit/${REPO_DEFAULT_BRANCH}/${clean}`;
 }
 
-/** GitHub web blob (read) URL for a repo-relative source path. */
-export function blobUrl(sourcePath: string): string {
+/** GitHub web blob URL for the exact revision rendered by the reading surface. */
+export function blobUrl(sourcePath: string, revision: string): string {
 	const clean = sourcePath.replace(/^\//, '');
-	return `${REPO_URL}/blob/${REPO_DEFAULT_BRANCH}/${clean}`;
+	return `${REPO_URL}/blob/${revision}/${clean}`;
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import manifest from '$content/.manifest.json';
 import { bookletMetadata } from '$lib/docs/booklet';
-import { REPO_DEFAULT_BRANCH, REPO_URL } from '$lib/repo';
+import { REPO_URL } from '$lib/repo';
 import {
 	algorithmTopics,
 	allEntries,
@@ -13,6 +14,7 @@ import {
 	resolveEntrySummary,
 	ROUTED_SECTIONS,
 	sheetsInOrder,
+	sourceCommit,
 } from './registry';
 
 // Contract for the registry's routing surface, pinned against the committed
@@ -78,9 +80,9 @@ describe('makeLinkResolver', () => {
 		expect(resolve('../reference/11-14-day-whiteboard-ramp.md#day-1')).toBe('/reference/14-day-whiteboard-ramp#day-1');
 	});
 
-	it('falls back to the GitHub blob URL for unsynced paths', () => {
-		expect(resolve('../../scripts/practice_day.py')).toBe(
-			`${REPO_URL}/blob/${REPO_DEFAULT_BRANCH}/scripts/practice_day.py`,
+	it('keeps unsynced source links and their anchors at the rendered packet revision', () => {
+		expect(resolve('../../scripts/practice_day.py#main')).toBe(
+			`${REPO_URL}/blob/${sourceCommit}/scripts/practice_day.py#main`,
 		);
 	});
 
@@ -93,20 +95,20 @@ describe('makeLinkResolver', () => {
 });
 
 describe('display copy', () => {
-	it('prefers packet descriptions while retaining the legacy prose fallback', () => {
-		expect(
-			resolveEntrySummary({
-				section: 'guide',
-				slug: 'getting-started',
-				summary: 'Source-authored summary.',
-			}),
-		).toBe('Source-authored summary.');
-		expect(resolveEntrySummary({ section: 'guide', slug: 'getting-started' })).toBe(
-			'Start an editor rep, write your reasoning in comments, implement, and test.',
-		);
+	it('uses the actual locked packet descriptions for every current reading entry', () => {
+		for (const entry of allEntries()) {
+			const source = manifest.entries.find((record) => record.out === entry.out)!;
+			expect(source.summary?.trim(), entry.out).toBeTruthy();
+			expect(entry.summary, entry.out).toBe(source.summary.trim());
+		}
 	});
 
-	it('keeps curated summaries and titles free of literal markdown backticks', () => {
+	it('leaves missing or blank descriptions empty instead of inventing fallback prose', () => {
+		expect(resolveEntrySummary({ section: 'guide', slug: 'getting-started' })).toBe('');
+		expect(resolveEntrySummary({ section: 'guide', slug: 'getting-started', summary: '  ' })).toBe('');
+	});
+
+	it('keeps reading summaries and titles free of literal markdown backticks', () => {
 		// Summaries render as plain text (card grids, meta descriptions), so a
 		// backtick would show up literally.
 		for (const entry of allEntries().filter((e) => e.section !== 'algorithms')) {

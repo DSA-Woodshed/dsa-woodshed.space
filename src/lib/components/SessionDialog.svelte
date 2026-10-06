@@ -4,7 +4,7 @@
 	import { availableCapabilities, MAX_SESSION_MINUTES, sessionCommand } from '$lib/capabilities';
 	import { REPO_SLUG, REPO_URL } from '$lib/repo';
 	import { sourceCommit } from '$lib/docs/registry';
-	let { open = $bindable(false) } = $props<{ open?: boolean }>();
+	let { open = $bindable(false), returnFocus = null } = $props<{ open?: boolean; returnFocus?: HTMLElement | null }>();
 	let mode = $state('study');
 	let capabilityId = $state('');
 	let minutes = $state(30);
@@ -47,6 +47,7 @@
 	closeOnEscape
 	closeOnInteractOutside
 	preventScroll
+	finalFocusEl={() => (returnFocus?.isConnected ? returnFocus : null)}
 >
 	<Portal>
 		<Dialog.Backdrop class="fixed inset-0 z-(--z-modal-backdrop) bg-black/60" />
