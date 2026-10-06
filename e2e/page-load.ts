@@ -10,11 +10,12 @@ const headings = new Map([
 	['/reference', 'Reference Sheets'],
 	['/project', 'A public woodshed'],
 	['/agent', 'A public woodshed'],
-	['/start', 'Make time for a rep'],
-	...manifest.entries.map(({ section, slug, title }): [string, string] => [
-		section === 'challenges' || section === 'printables' ? `/${section}` : `/${section}/${slug}`,
-		title,
-	]),
+	...manifest.entries
+		.filter(({ section }) => ['guide', 'reference', 'challenges', 'printables'].includes(section))
+		.map(({ section, slug, title }): [string, string] => [
+			section === 'challenges' || section === 'printables' ? `/${section}` : `/${section}/${slug}`,
+			title,
+		]),
 ]);
 
 export async function openProductPage(page: Page, route: string) {

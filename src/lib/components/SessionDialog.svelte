@@ -188,8 +188,8 @@
 						<p>
 							If you choose a managed seat, follow its supported setup, then run <code>just protected-capability</code>
 							in that workspace. It validates local runtime bindings through an independently installed adapter; it does not
-							verify issuer access, withdrawal, or IDE availability. An absent or unadmitted adapter reports unavailable (exit
-							78).
+							verify issuer access, withdrawal, or IDE availability. An absent adapter or failed local validation reports
+							unavailable (exit 78).
 						</p>
 						<a class="block underline" href={`${REPO_URL}/blob/${sourceCommit}/docs/guide/portable-environment.md`}
 							>Portable environment and protected-service guidance</a
