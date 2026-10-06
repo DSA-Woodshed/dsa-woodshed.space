@@ -1,5 +1,64 @@
 import { expect, test } from '@playwright/test';
 
+for (const width of [1280, 390]) {
+	test(`one chooser keeps the elected session across launchers and routes at ${width}px`, async ({ page, request }) => {
+		await page.setViewportSize({ width, height: 900 });
+		const inventory = await (await request.get('/capabilities.json')).json();
+		const capability = inventory.capabilities.find(
+			(entry: { availability: string; modes: string[] }) =>
+				entry.availability === 'available' && entry.modes.includes('implement'),
+		);
+		await page.goto('/start');
+		const chooser = page.getByRole('dialog', { name: 'Choose your session' });
+		await expect(chooser).toHaveCount(1);
+		await chooser.getByLabel('What would you like to do?').selectOption('implement');
+		await chooser.getByLabel('Choose something to work on').selectOption(capability.id);
+		await chooser.getByLabel('Custom minutes').fill('45');
+		await chooser.getByRole('checkbox', { name: "I'm ready to move from study to candidate work" }).check();
+		const command = `just session start ${capability.id} --mode implement --minutes 45 --ready`;
+		await expect(chooser.getByTestId('session-start-command')).toHaveText(command);
+		await page.keyboard.press('Escape');
+		const pageLauncher = page.getByRole('button', { name: 'Choose a session', exact: true });
+		await pageLauncher.click();
+		await expect(chooser.getByTestId('session-start-command')).toHaveText(command);
+		await page.keyboard.press('Escape');
+		await expect(pageLauncher).toBeFocused();
+		if (width < 1024) await page.getByRole('button', { name: 'Open navigation' }).click();
+		const navLauncher = page.getByRole('button', { name: 'Start', exact: true });
+		await navLauncher.click();
+		await expect(chooser).toHaveCount(1);
+		await expect(chooser.getByTestId('session-start-command')).toHaveText(command);
+		await page.keyboard.press('Escape');
+		await expect(width < 1024 ? page.getByRole('button', { name: 'Open navigation' }) : navLauncher).toBeFocused();
+		if (width < 1024) await page.getByRole('button', { name: 'Open navigation' }).click();
+		const navigation =
+			width < 1024
+				? page.getByRole('dialog', { name: 'The DSA Woodshed navigation' })
+				: page.getByRole('navigation', { name: 'Primary navigation' });
+		await navigation.getByRole('link', { name: 'Library', exact: true }).click();
+		await expect(page.getByRole('heading', { name: 'Library', exact: true })).toBeVisible();
+		if (width < 1024) await page.getByRole('button', { name: 'Open navigation' }).click();
+		await navLauncher.click();
+		await expect(chooser.getByTestId('session-start-command')).toHaveText(command);
+		await page.keyboard.press('Escape');
+		await page.getByRole('link', { name: 'Choose a session', exact: true }).click();
+		await expect(chooser.getByTestId('session-start-command')).toHaveText(command);
+	});
+}
+
+test('rendered source views stay pinned while contribution editing follows main', async ({ page, request }) => {
+	const receipt = await (await request.get('/deployment-receipt.json')).json();
+	await page.goto('/reference/python-stdlib');
+	await expect(page.getByRole('link', { name: "View this page's source on GitHub" })).toHaveAttribute(
+		'href',
+		`https://github.com/DSA-Woodshed/dsa-study-packet/blob/${receipt.packetCommit}/reference-sheets/01-python-stdlib.md`,
+	);
+	await expect(page.getByRole('link', { name: 'Edit this page on GitHub' })).toHaveAttribute(
+		'href',
+		'https://github.com/DSA-Woodshed/dsa-study-packet/edit/main/reference-sheets/01-python-stdlib.md',
+	);
+});
+
 test('guided session uses the published inventory and chosen budget', async ({ page, request }) => {
 	const response = await request.get('/capabilities.json');
 	expect(response.ok()).toBe(true);

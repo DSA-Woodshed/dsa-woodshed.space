@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { setContext } from 'svelte';
 	import { page } from '$app/state';
 	import { PublicNavigation, SiteFooter } from '@xoxd/public-chrome';
 	import { FOUC_SCRIPT } from '@xoxd/public-chrome/fouc';
@@ -6,6 +7,7 @@
 	import SiteNav from '$lib/components/SiteNav.svelte';
 	import SearchDialog from '$lib/components/SearchDialog.svelte';
 	import SessionDialog from '$lib/components/SessionDialog.svelte';
+	import { SESSION_DIALOG_CONTEXT } from '$lib/session-dialog';
 	import { REPO_URL } from '$lib/repo';
 	import { SITE_REPO_URL } from '$lib/site-repo';
 	import { buildSha, buildShaShort } from '$lib/build-info';
@@ -13,7 +15,21 @@
 	import '../app.css';
 
 	let { children } = $props();
-	let sessionOpen = $state(false);
+	// Preserve /start's initial-open behavior before the controlled dialog connects.
+	let sessionOpen = $state(page.url.pathname === '/start');
+	let sessionReturnFocus = $state<HTMLElement | null>(null);
+	function openSessionDialog(trigger?: HTMLElement): void {
+		const active = document.activeElement;
+		// The shared mobile drawer closes before invoking its action. Return to
+		// its persistent launcher rather than the button in the dismissed drawer.
+		sessionReturnFocus =
+			trigger ??
+			(active instanceof HTMLElement && !active.closest('[role="dialog"]') && active !== document.body
+				? active
+				: document.querySelector<HTMLElement>('button[aria-label="Open navigation"]'));
+		sessionOpen = true;
+	}
+	setContext(SESSION_DIALOG_CONTEXT, openSessionDialog);
 	const SITE_NAME = 'The DSA Woodshed';
 	const SITE_URL = 'https://dsa-woodshed.space';
 	const SITE_DESCRIPTION =
@@ -96,7 +112,7 @@
 			{identity}
 			pathname={page.url.pathname}
 			{navLinks}
-			action={{ label: 'Start', onselect: () => (sessionOpen = true) }}
+			action={{ label: 'Start', onselect: () => openSessionDialog() }}
 		>
 			{#snippet trailing()}<SearchDialog />{/snippet}
 			{#snippet mobileSection(close)}
@@ -125,4 +141,4 @@
 		</SiteFooter>
 	</div>
 </div>
-<SessionDialog bind:open={sessionOpen} />
+<SessionDialog bind:open={sessionOpen} returnFocus={sessionReturnFocus} />

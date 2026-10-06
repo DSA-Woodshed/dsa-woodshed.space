@@ -12,6 +12,7 @@
 	// (pointed at DSA-Woodshed/dsa-study-packet). No org/repo string is hardcoded.
 	import { Code, Pencil } from '@lucide/svelte';
 	import { editUrl, blobUrl } from '$lib/repo';
+	import { sourceCommit } from '$lib/docs/registry';
 
 	interface Props {
 		/** Repo-relative source path in the content repo, e.g. `reference-sheets/03-algorithm-templates.md`. */
@@ -21,7 +22,7 @@
 	let { sourcePath }: Props = $props();
 
 	const edit = $derived(editUrl(sourcePath));
-	const blob = $derived(blobUrl(sourcePath));
+	const blob = $derived(blobUrl(sourcePath, sourceCommit));
 </script>
 
 {#if sourcePath}

@@ -20,7 +20,8 @@ export const availableCapabilities = capabilities.filter((capability) => capabil
 export const MAX_SESSION_MINUTES = 1440;
 
 export function sessionCommand(capability: Capability, mode: string, minutes: number, ready = false): string {
-	if (!availableCapabilities.some((entry) => entry.id === capability.id) || !capability.modes.includes(mode)) {
+	const canonical = availableCapabilities.find((entry) => entry.id === capability.id);
+	if (!canonical || !canonical.modes.includes(mode)) {
 		throw new Error('Choose an available capability and supported mode.');
 	}
 	if (!Number.isSafeInteger(minutes) || minutes < 1 || minutes > MAX_SESSION_MINUTES) {
@@ -29,8 +30,8 @@ export function sessionCommand(capability: Capability, mode: string, minutes: nu
 	if (ready && !['implement', 'tests-first'].includes(mode)) {
 		throw new Error('Choose readiness only when moving to candidate work.');
 	}
-	if (!/^[a-z0-9][a-z0-9_./-]*$/.test(capability.id) || !/^[a-z-]+$/.test(mode)) {
+	if (!/^[a-z0-9][a-z0-9_./-]*$/.test(canonical.id) || !/^[a-z-]+$/.test(mode)) {
 		throw new Error('The catalog contains an invalid session identifier.');
 	}
-	return `just session start ${capability.id} --mode ${mode} --minutes ${minutes}${ready ? ' --ready' : ''}`;
+	return `just session start ${canonical.id} --mode ${mode} --minutes ${minutes}${ready ? ' --ready' : ''}`;
 }
