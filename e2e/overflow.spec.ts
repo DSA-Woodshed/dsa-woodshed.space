@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openProductPage } from './page-load';
 
 // Static scaffold regression guard: no document-level horizontal overflow at
 // canonical breakpoints, and every same-page hash link on the home route
@@ -37,9 +38,7 @@ for (const bp of breakpoints) {
 	for (const route of routes) {
 		test(`${route} has no document overflow at ${bp.label} (${bp.width}px)`, async ({ page }) => {
 			await page.setViewportSize({ width: bp.width, height: bp.height });
-			const response = await page.goto(route);
-			expect(response?.ok(), `${route} must serve a real product page`).toBe(true);
-			await page.waitForLoadState('networkidle');
+			await openProductPage(page, route);
 			const { scrollWidth, innerWidth } = await page.evaluate(() => ({
 				scrollWidth: document.documentElement.scrollWidth,
 				innerWidth: window.innerWidth,
