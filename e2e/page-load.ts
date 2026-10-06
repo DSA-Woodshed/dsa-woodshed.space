@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { expect, type ConsoleMessage, type Page, type Request } from '@playwright/test';
+import { extractHeadings } from '../src/lib/docs/markdown';
 
 const manifest = JSON.parse(readFileSync('src/content/.manifest.json', 'utf8')) as {
-	entries: { section: string; slug: string; title: string }[];
+	entries: { section: string; slug: string; title: string; out: string }[];
 };
 const headings = new Map([
 	['/', 'Woodshedding for the whiteboard.'],
@@ -12,10 +13,14 @@ const headings = new Map([
 	['/agent', 'A public woodshed'],
 	...manifest.entries
 		.filter(({ section }) => ['guide', 'reference', 'challenges', 'printables'].includes(section))
-		.map(({ section, slug, title }): [string, string] => [
-			section === 'challenges' || section === 'printables' ? `/${section}` : `/${section}/${slug}`,
-			title,
-		]),
+		.map(({ section, slug, title, out }): [string, string] => {
+			const heading =
+				section === 'reference'
+					? extractHeadings(readFileSync(`src/content/${out}`, 'utf8')).find(({ depth }) => depth === 1)?.text
+					: title;
+			if (!heading) throw new Error(`No authored page heading in ${out}`);
+			return [section === 'challenges' || section === 'printables' ? `/${section}` : `/${section}/${slug}`, heading];
+		}),
 ]);
 
 export async function openProductPage(page: Page, route: string) {

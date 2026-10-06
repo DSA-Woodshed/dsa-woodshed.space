@@ -20,3 +20,14 @@ test('page-loaded guard rejects a failed navigation', async ({ page }) => {
 	await page.route('**/reference', (route) => route.abort('failed'));
 	await expect(openProductPage(page, '/reference')).rejects.toThrow();
 });
+
+test('page-loaded guard accepts the authored reference heading instead of its navigation title', async ({ page }) => {
+	await page.route('**/reference/algorithm-templates', (route) =>
+		route.fulfill({
+			status: 200,
+			contentType: 'text/html',
+			body: '<!doctype html><main><h1>Algorithm Templates (Page 1 of 4)</h1></main>',
+		}),
+	);
+	await openProductPage(page, '/reference/algorithm-templates');
+});
