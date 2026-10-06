@@ -19,6 +19,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
+const BUILD_DIR = process.env.BUILD_OUTPUT_DIR || 'build';
 const CONTENT_LANES = ['src/content/guide', 'src/content/reference'];
 const FENCE = /^```mermaid\b/m;
 
@@ -40,7 +41,7 @@ function builtHtmlFor(mdPath) {
 	// build/guide/foo/index.html depending on adapter trailingSlash config;
 	// accept either so this gate tracks the adapter, not one layout.
 	const rel = mdPath.replace(/^src\/content\//, '').replace(/\.md$/, '');
-	const candidates = [join('build', `${rel}.html`), join('build', rel, 'index.html')];
+	const candidates = [join(BUILD_DIR, `${rel}.html`), join(BUILD_DIR, rel, 'index.html')];
 	return candidates.find(existsSync);
 }
 

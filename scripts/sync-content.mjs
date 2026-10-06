@@ -1,10 +1,10 @@
 // Cross-repo content sync: copy the DSA study packet's docs into src/content/
-// and its machine-readable agent map into static/agent-map.md.
+// and its machine-readable capability inventory into static/capabilities.json.
 //
 // WHAT THIS IS
 //   The DSA Woodshed is a *reading surface*. Its prose and reference sheets are
 //   authored and version-controlled in a SEPARATE repo: the DSA study packet
-//   (Jesssullivan/dsa-study-packet), which is the single source of truth. This
+//   (DSA-Woodshed/dsa-study-packet), which is the single source of truth. This
 //   script pulls the needed files out of a packet checkout, resolves the mkdocs
 //   snippet includes the packet uses, and writes plain markdown / mdsvex files
 //   into src/content/ that the SvelteKit build renders.
@@ -25,16 +25,27 @@
 //     lookup, so a stripped practice file or concurrent ref move cannot change a
 //     locked build.
 //   - Recorded: src/content/.manifest.json pins the packet commit, the generated
-//     agent map, and every content entry (source inputs, resolved output, lane,
+//     capability inventory, and every content entry (source inputs, resolved output, lane,
 //     source-authored title/summary, and content hash) so drift is auditable.
 //
 // PLAIN NODE. No dependencies or bundler. Runs under `node scripts/sync-content.mjs`.
 
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+	existsSync,
+	mkdtempSync,
+	mkdirSync,
+	readFileSync,
+	readdirSync,
+	renameSync,
+	rmSync,
+	statSync,
+	writeFileSync,
+} from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tmpdir } from 'node:os';
 import { syncAlgorithms } from './sync-algorithms.mjs';
 import { syncBookletRelease } from './sync-booklet.mjs';
 import { readPacketLock, resolveReachablePacketCommit } from './packet-lock.mjs';
@@ -44,8 +55,8 @@ const HERE = dirname(THIS_FILE);
 const REPO_ROOT = resolve(HERE, '..');
 const CONTENT_DIR = join(REPO_ROOT, 'src', 'content');
 const MANIFEST_PATH = join(CONTENT_DIR, '.manifest.json');
-const AGENT_MAP_INPUT = 'agent-map.md';
-const AGENT_MAP_PATH = join(REPO_ROOT, 'static', 'agent-map.md');
+const CAPABILITIES_INPUT = 'scripts/catalog.py --json';
+const CAPABILITIES_PATH = join(REPO_ROOT, 'static', 'capabilities.json');
 
 // Source object database: dev uses the sibling packet checkout; CI checks out the
 // manifest's exact revision and passes its path through WOODSHED_PACKET_PATH.
@@ -452,36 +463,36 @@ function writeFileDeep(absPath, text) {
  * throws, restore both prior files and retain both errors if rollback also fails.
  *
  * @param {{
- *   agentMapPath: string,
+ *   capabilitiesPath: string,
  *   manifestPath: string,
- *   agentMap: string,
+ *   capabilities: string,
  *   manifestText: string,
  *   replaceFile?: typeof import('node:fs').renameSync,
  * }} args
  */
 export function publishTrackedOutputs({
-	agentMapPath,
+	capabilitiesPath,
 	manifestPath,
-	agentMap,
+	capabilities,
 	manifestText,
 	replaceFile = renameSync,
 }) {
-	const priorMap = existsSync(agentMapPath) ? readFileSync(agentMapPath, 'utf8') : undefined;
+	const priorMap = existsSync(capabilitiesPath) ? readFileSync(capabilitiesPath, 'utf8') : undefined;
 	const priorManifest = existsSync(manifestPath) ? readFileSync(manifestPath, 'utf8') : undefined;
 	const nonce = `${process.pid}-${Date.now()}`;
-	const mapTemp = `${agentMapPath}.tmp-${nonce}`;
+	const mapTemp = `${capabilitiesPath}.tmp-${nonce}`;
 	const manifestTemp = `${manifestPath}.tmp-${nonce}`;
 
 	try {
-		writeFileDeep(mapTemp, agentMap);
+		writeFileDeep(mapTemp, capabilities);
 		writeFileDeep(manifestTemp, manifestText);
-		replaceFile(mapTemp, agentMapPath);
+		replaceFile(mapTemp, capabilitiesPath);
 		replaceFile(manifestTemp, manifestPath);
 	} catch (error) {
 		const rollbackErrors = [];
 		try {
-			if (priorMap === undefined) rmSync(agentMapPath, { force: true });
-			else writeFileDeep(agentMapPath, priorMap);
+			if (priorMap === undefined) rmSync(capabilitiesPath, { force: true });
+			else writeFileDeep(capabilitiesPath, priorMap);
 		} catch (rollbackError) {
 			rollbackErrors.push(rollbackError);
 		}
@@ -501,6 +512,27 @@ export function publishTrackedOutputs({
 	}
 }
 
+/** Export product data from the same immutable packet tree as the prose. */
+export function exportCapabilities(packetPath, sourceCommit) {
+	const scratch = mkdtempSync(join(tmpdir(), 'woodshed-capabilities-'));
+	try {
+		const archive = execFileSync('git', ['-C', packetPath, 'archive', sourceCommit], { maxBuffer: 50 * 1024 * 1024 });
+		execFileSync('tar', ['-xf', '-', '-C', scratch], { input: archive });
+		const text = execFileSync('python3', ['-S', 'scripts/catalog.py', '--json'], {
+			cwd: scratch,
+			encoding: 'utf8',
+			maxBuffer: 10 * 1024 * 1024,
+		});
+		const value = JSON.parse(text);
+		if (value.schema !== 1 || !Array.isArray(value.capabilities)) {
+			throw new Error('packet catalog must export schema 1 with capabilities');
+		}
+		return JSON.stringify(value, null, '\t') + '\n';
+	} finally {
+		rmSync(scratch, { recursive: true, force: true });
+	}
+}
+
 // ── Main ───────────────────────────────────────────────────────────────────────
 async function main() {
 	if (!existsSync(PACKET_PATH) || !statSync(PACKET_PATH).isDirectory()) {
@@ -514,13 +546,7 @@ async function main() {
 	const sourceCommit = resolveLockedPacketCommit(PACKET_PATH, lock.sourceCommit);
 	cleanContentDir();
 
-	if (!packetFileExistsAtCommit(PACKET_PATH, sourceCommit, AGENT_MAP_INPUT)) {
-		throw new Error(`sync-content: agent map missing at packet commit ${sourceCommit}: ${AGENT_MAP_INPUT}`);
-	}
-	const agentMap = readAtCommit(sourceCommit, AGENT_MAP_INPUT).replace(/\n*$/, '\n');
-	if (!agentMap.trim()) {
-		throw new Error(`sync-content: agent map is empty at packet commit ${sourceCommit}: ${AGENT_MAP_INPUT}`);
-	}
+	const capabilities = exportCapabilities(PACKET_PATH, sourceCommit);
 
 	const entries = [];
 	for (const item of PLAN) {
@@ -576,23 +602,24 @@ async function main() {
 	entries.sort((a, b) => a.section.localeCompare(b.section) || a.order - b.order || a.slug.localeCompare(b.slug));
 
 	const manifest = {
+		schemaVersion: 2,
 		note: 'Generated by scripts/sync-content.mjs. Do not edit by hand; advance with `just packet-lock <sha>`.',
 		sourceRepo,
 		sourceCommit,
 		booklet: lock.booklet,
-		agentMap: {
-			input: AGENT_MAP_INPUT,
-			out: 'static/agent-map.md',
-			sha256: sha256(agentMap),
+		capabilities: {
+			input: CAPABILITIES_INPUT,
+			out: 'static/capabilities.json',
+			sha256: sha256(capabilities),
 		},
 		entries,
 	};
 	const manifestText = JSON.stringify(manifest, null, '\t') + '\n';
 
 	publishTrackedOutputs({
-		agentMapPath: AGENT_MAP_PATH,
+		capabilitiesPath: CAPABILITIES_PATH,
 		manifestPath: MANIFEST_PATH,
-		agentMap,
+		capabilities,
 		manifestText,
 	});
 

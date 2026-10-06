@@ -1,0 +1,7 @@
+{
+	"source": "https://github.com/Great-Falls-Tool-Bus/.github",
+	"revision": "7a4702fdb6bbeb99c4387d09f48cba096857c9ca",
+	"path": "githooks",
+	"adaptation": "DSA-Woodshed authority predicate, transferred Jesssullivan product aliases, and woodshed names; isolated Git configuration, real fork/transfer pushes, and case-insensitive owner fixtures",
+	"files": ["_lib.sh", "pre-commit", "commit-msg", "pre-push", "test.sh"]
+}

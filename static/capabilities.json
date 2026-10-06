@@ -1,0 +1,1526 @@
+{
+	"schema": 1,
+	"counts": {
+		"advanced": 4,
+		"algorithm": 72,
+		"concept": 7,
+		"contribution": 1,
+		"method": 1,
+		"reference": 10,
+		"review": 1
+	},
+	"capabilities": [
+		{
+			"id": "algorithm/arrays/two_sum",
+			"kind": "algorithm",
+			"title": "Given an array of integers and a target, return the indices of the two numbers that add up to the target.",
+			"source": "src/algo/arrays/two_sum.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/arrays/two_sum --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/arrays/group_anagrams",
+			"kind": "algorithm",
+			"title": "Given a list of strings, group the anagrams together.",
+			"source": "src/algo/arrays/group_anagrams.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/arrays/group_anagrams --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/arrays/product_except_self",
+			"kind": "algorithm",
+			"title": "Given an integer array, return an array where each element is the product of all other elements.",
+			"source": "src/algo/arrays/product_except_self.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/arrays/product_except_self --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/arrays/top_k_frequent",
+			"kind": "algorithm",
+			"title": "Given an integer array and an integer k, return the k most frequent elements.",
+			"source": "src/algo/arrays/top_k_frequent.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/arrays/top_k_frequent --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/two_pointers/container_with_most_water",
+			"kind": "algorithm",
+			"title": "Given n non-negative integers representing vertical line heights at positions 0..n-1, find the two lines that together with the x-axis form a...",
+			"source": "src/algo/two_pointers/container_with_most_water.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/two_pointers/container_with_most_water --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/two_pointers/three_sum",
+			"kind": "algorithm",
+			"title": "Given an integer array, return all unique triplets [a, b, c] such that a + b + c = 0.",
+			"source": "src/algo/two_pointers/three_sum.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/two_pointers/three_sum --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/two_pointers/trapping_rain_water",
+			"kind": "algorithm",
+			"title": "Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water can be trapped after raining.",
+			"source": "src/algo/two_pointers/trapping_rain_water.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/two_pointers/trapping_rain_water --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/sliding_window/min_window_substring",
+			"kind": "algorithm",
+			"title": "Given strings s and t, find the minimum window substring of s that contains all characters of t (including duplicates).",
+			"source": "src/algo/sliding_window/min_window_substring.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/sliding_window/min_window_substring --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/sliding_window/longest_substring_no_repeat",
+			"kind": "algorithm",
+			"title": "Given a string s, find the length of the longest substring without repeating characters.",
+			"source": "src/algo/sliding_window/longest_substring_no_repeat.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/sliding_window/longest_substring_no_repeat --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/stacks_queues/min_stack",
+			"kind": "algorithm",
+			"title": "Design a stack that supports push, pop, top, and retrieving the minimum element, all in O(1) time.",
+			"source": "src/algo/stacks_queues/min_stack.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/stacks_queues/min_stack --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/stacks_queues/valid_parentheses",
+			"kind": "algorithm",
+			"title": "Given a string containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
+			"source": "src/algo/stacks_queues/valid_parentheses.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/stacks_queues/valid_parentheses --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/stacks_queues/daily_temperatures",
+			"kind": "algorithm",
+			"title": "Given an array of daily temperatures, return an array where each element is the number of days you would have to wait until a warmer temperature.",
+			"source": "src/algo/stacks_queues/daily_temperatures.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/stacks_queues/daily_temperatures --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/searching/binary_search",
+			"kind": "algorithm",
+			"title": "Given a sorted array of integers and a target value, return the index of the target if found, otherwise return -1.",
+			"source": "src/algo/searching/binary_search.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/searching/binary_search --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/searching/find_minimum_rotated",
+			"kind": "algorithm",
+			"title": "Given a rotated sorted array of unique elements, find the minimum element.",
+			"source": "src/algo/searching/find_minimum_rotated.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/searching/find_minimum_rotated --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/searching/search_rotated_array",
+			"kind": "algorithm",
+			"title": "An array sorted in ascending order was rotated at some pivot.",
+			"source": "src/algo/searching/search_rotated_array.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/searching/search_rotated_array --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/linked_lists/merge_two_sorted",
+			"kind": "algorithm",
+			"title": "Given the heads of two sorted linked lists, merge them into one sorted list built from the nodes of the two input lists.",
+			"source": "src/algo/linked_lists/merge_two_sorted.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/linked_lists/merge_two_sorted --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/linked_lists/reverse_linked_list",
+			"kind": "algorithm",
+			"title": "Given the head of a singly linked list, reverse the list and return the new head.",
+			"source": "src/algo/linked_lists/reverse_linked_list.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/linked_lists/reverse_linked_list --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/linked_lists/lru_cache",
+			"kind": "algorithm",
+			"title": "Design a data structure that follows the Least Recently Used (LRU) eviction policy, supporting get and put in O(1) time.",
+			"source": "src/algo/linked_lists/lru_cache.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/linked_lists/lru_cache --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/trees/invert_tree",
+			"kind": "algorithm",
+			"title": "Given the root of a binary tree, invert the tree so that every left child becomes the right child and vice versa.",
+			"source": "src/algo/trees/invert_tree.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/trees/invert_tree --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/trees/validate_bst",
+			"kind": "algorithm",
+			"title": "Given the root of a binary tree, determine if it is a valid BST.",
+			"source": "src/algo/trees/validate_bst.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/trees/validate_bst --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/trees/level_order_traversal",
+			"kind": "algorithm",
+			"title": "Given the root of a binary tree, return the level-order traversal as a list of lists, where each inner list contains the values at that depth level.",
+			"source": "src/algo/trees/level_order_traversal.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/trees/level_order_traversal --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/trees/max_depth",
+			"kind": "algorithm",
+			"title": "Given the root of a binary tree, return its maximum depth (number of nodes along the longest path from root to a leaf).",
+			"source": "src/algo/trees/max_depth.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/trees/max_depth --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/trees/trie",
+			"kind": "algorithm",
+			"title": "Implement a prefix tree that supports insert, search, prefix matching, delete, and autocomplete operations on a set of strings.",
+			"source": "src/algo/trees/trie.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/trees/trie --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/graphs/clone_graph",
+			"kind": "algorithm",
+			"title": "Given a reference of a node in a connected undirected graph, return a deep copy (clone) of the graph.",
+			"source": "src/algo/graphs/clone_graph.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/graphs/clone_graph --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/graphs/number_of_islands",
+			"kind": "algorithm",
+			"title": "Given an m x n 2D binary grid where '1' represents land and '0' represents water, return the number of islands.",
+			"source": "src/algo/graphs/number_of_islands.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/graphs/number_of_islands --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/graphs/topological_sort",
+			"kind": "algorithm",
+			"title": "Given a DAG represented as an adjacency list, return a valid topological ordering of its vertices.",
+			"source": "src/algo/graphs/topological_sort.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/graphs/topological_sort --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/graphs/course_schedule",
+			"kind": "algorithm",
+			"title": "There are numCourses courses labeled 0..numCourses-1.",
+			"source": "src/algo/graphs/course_schedule.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/graphs/course_schedule --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/graphs/dijkstra",
+			"kind": "algorithm",
+			"title": "Given a weighted directed graph and a source vertex, find the shortest path from the source to every other reachable vertex.",
+			"source": "src/algo/graphs/dijkstra.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/graphs/dijkstra --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/graphs/a_star_search",
+			"kind": "algorithm",
+			"title": "Given a 2D grid where each cell has a non-negative traversal cost, find the shortest (least-cost) path from a start cell to a goal cell using A*...",
+			"source": "src/algo/graphs/a_star_search.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/graphs/a_star_search --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/graphs/bellman_ford",
+			"kind": "algorithm",
+			"title": "Given a weighted directed graph, find the shortest path from a source to all other vertices.",
+			"source": "src/algo/graphs/bellman_ford.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/graphs/bellman_ford --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/graphs/geohash_grid",
+			"kind": "algorithm",
+			"title": "Encode a (latitude, longitude) pair into a geohash string of a given precision.",
+			"source": "src/algo/graphs/geohash_grid.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/graphs/geohash_grid --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/graphs/kd_tree",
+			"kind": "algorithm",
+			"title": "Given a set of k-dimensional points, build a data structure that supports efficient nearest-neighbor queries.",
+			"source": "src/algo/graphs/kd_tree.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/graphs/kd_tree --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/graphs/minimum_spanning_tree",
+			"kind": "algorithm",
+			"title": "Given an undirected weighted graph, find a subset of edges that connects all vertices with minimum total weight and no cycles.",
+			"source": "src/algo/graphs/minimum_spanning_tree.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/graphs/minimum_spanning_tree --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/graphs/network_delay_time",
+			"kind": "algorithm",
+			"title": "Given a network of n nodes (1-indexed) and directed weighted edges ``times[i] = (u, v, w)``, send a signal from node k.",
+			"source": "src/algo/graphs/network_delay_time.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/graphs/network_delay_time --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/graphs/network_flow",
+			"kind": "algorithm",
+			"title": "Given a directed graph with edge capacities, find the maximum flow from a source node to a sink node.",
+			"source": "src/algo/graphs/network_flow.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/graphs/network_flow --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/graphs/word_ladder",
+			"kind": "algorithm",
+			"title": "Given two words and a dictionary, find the length of the shortest transformation sequence from beginWord to endWord, such that only one letter can...",
+			"source": "src/algo/graphs/word_ladder.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/graphs/word_ladder --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/dp/climbing_stairs",
+			"kind": "algorithm",
+			"title": "You are climbing a staircase with n steps.",
+			"source": "src/algo/dp/climbing_stairs.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/dp/climbing_stairs --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/dp/coin_change",
+			"kind": "algorithm",
+			"title": "Given an array of coin denominations and a target amount, return the fewest number of coins needed to make that amount.",
+			"source": "src/algo/dp/coin_change.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/dp/coin_change --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/dp/constraint_satisfaction",
+			"kind": "algorithm",
+			"title": "Solve constraint satisfaction problems using backtracking with constraint propagation (arc consistency / forward checking).",
+			"source": "src/algo/dp/constraint_satisfaction.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/dp/constraint_satisfaction --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/dp/edit_distance",
+			"kind": "algorithm",
+			"title": "Given two strings, return the minimum number of single-character operations (insert, delete, replace) to convert word1 into word2.",
+			"source": "src/algo/dp/edit_distance.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/dp/edit_distance --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/dp/knapsack",
+			"kind": "algorithm",
+			"title": "Given n items, each with a weight and value, and a knapsack with a weight capacity W, choose items to maximize total value without exceeding capacity.",
+			"source": "src/algo/dp/knapsack.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/dp/knapsack --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/dp/longest_increasing_subseq",
+			"kind": "algorithm",
+			"title": "Given an integer array, return the length of the longest strictly increasing subsequence.",
+			"source": "src/algo/dp/longest_increasing_subseq.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/dp/longest_increasing_subseq --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/dp/longest_common_subseq",
+			"kind": "algorithm",
+			"title": "Given two strings, return the length of their longest common subsequence.",
+			"source": "src/algo/dp/longest_common_subseq.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/dp/longest_common_subseq --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/dp/traveling_salesman_dp",
+			"kind": "algorithm",
+			"title": "Given a weighted adjacency matrix of n cities, find the minimum cost of visiting every city exactly once and returning to the starting city.",
+			"source": "src/algo/dp/traveling_salesman_dp.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/dp/traveling_salesman_dp --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/heaps/kth_largest",
+			"kind": "algorithm",
+			"title": "Given an unsorted array and an integer k, return the kth largest element.",
+			"source": "src/algo/heaps/kth_largest.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/heaps/kth_largest --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/heaps/merge_k_sorted_lists",
+			"kind": "algorithm",
+			"title": "Given an array of k sorted linked lists, merge them into one sorted linked list.",
+			"source": "src/algo/heaps/merge_k_sorted_lists.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/heaps/merge_k_sorted_lists --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/heaps/task_scheduler",
+			"kind": "algorithm",
+			"title": "Given a list of tasks (characters) and a cooldown period n, find the minimum number of intervals needed to execute all tasks.",
+			"source": "src/algo/heaps/task_scheduler.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/heaps/task_scheduler --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/backtracking/subsets",
+			"kind": "algorithm",
+			"title": "Given an integer array of unique elements, return all possible subsets (the power set).",
+			"source": "src/algo/backtracking/subsets.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/backtracking/subsets --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/backtracking/combination_sum",
+			"kind": "algorithm",
+			"title": "Given an array of distinct positive integers (candidates) and a target integer, return all unique combinations where the chosen numbers sum to target.",
+			"source": "src/algo/backtracking/combination_sum.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/backtracking/combination_sum --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/backtracking/n_queens",
+			"kind": "algorithm",
+			"title": "Place n queens on an n x n chessboard such that no two queens threaten each other (no shared row, column, or diagonal).",
+			"source": "src/algo/backtracking/n_queens.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/backtracking/n_queens --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/backtracking/permutations",
+			"kind": "algorithm",
+			"title": "Given an array of distinct integers, return all possible permutations in any order.",
+			"source": "src/algo/backtracking/permutations.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/backtracking/permutations --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/greedy/interval_scheduling",
+			"kind": "algorithm",
+			"title": "Given a collection of intervals, find the maximum number of non-overlapping intervals (activity selection problem).",
+			"source": "src/algo/greedy/interval_scheduling.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/greedy/interval_scheduling --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/greedy/merge_intervals",
+			"kind": "algorithm",
+			"title": "Given an array of intervals where intervals[i] = [start_i, end_i], merge all overlapping intervals and return the non-overlapping result covering...",
+			"source": "src/algo/greedy/merge_intervals.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/greedy/merge_intervals --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/greedy/jump_game",
+			"kind": "algorithm",
+			"title": "Jump Game - can you reach the last index? / minimum jumps.",
+			"source": "src/algo/greedy/jump_game.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/greedy/jump_game --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/strings/longest_common_prefix",
+			"kind": "algorithm",
+			"title": "Given a list of strings, return the longest common prefix shared by all of them.",
+			"source": "src/algo/strings/longest_common_prefix.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/strings/longest_common_prefix --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/strings/valid_palindrome",
+			"kind": "algorithm",
+			"title": "Given a string, determine if it is a palindrome considering only alphanumeric characters and ignoring case.",
+			"source": "src/algo/strings/valid_palindrome.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/strings/valid_palindrome --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/strings/longest_palindromic_substring",
+			"kind": "algorithm",
+			"title": "Given a string, return the longest substring that is a palindrome.",
+			"source": "src/algo/strings/longest_palindromic_substring.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/strings/longest_palindromic_substring --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/strings/string_to_integer_atoi",
+			"kind": "algorithm",
+			"title": "Implement atoi which converts a string to a 32-bit signed integer.",
+			"source": "src/algo/strings/string_to_integer_atoi.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/strings/string_to_integer_atoi --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/strings/valid_anagram",
+			"kind": "algorithm",
+			"title": "Given two strings, determine if one is an anagram of the other (same characters, same frequencies, different order allowed).",
+			"source": "src/algo/strings/valid_anagram.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/strings/valid_anagram --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/recursion/generate_parentheses",
+			"kind": "algorithm",
+			"title": "Given n pairs of parentheses, generate all combinations of well-formed (balanced) parentheses.",
+			"source": "src/algo/recursion/generate_parentheses.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/recursion/generate_parentheses --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/recursion/flatten_nested_list",
+			"kind": "algorithm",
+			"title": "Given a nested list of integers (can be arbitrarily deep), flatten it into a single list of integers.",
+			"source": "src/algo/recursion/flatten_nested_list.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/recursion/flatten_nested_list --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/recursion/letter_combinations_phone",
+			"kind": "algorithm",
+			"title": "Given a string containing digits from 2-9, return all possible letter combinations that the number could represent on a phone keypad.",
+			"source": "src/algo/recursion/letter_combinations_phone.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/recursion/letter_combinations_phone --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/recursion/pow_x_n",
+			"kind": "algorithm",
+			"title": "Implement pow(x, n), which calculates x raised to the power n (i.e., x^n).",
+			"source": "src/algo/recursion/pow_x_n.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/recursion/pow_x_n --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/recursion/tower_of_hanoi",
+			"kind": "algorithm",
+			"title": "Move n disks from a source peg to a target peg using an auxiliary peg.",
+			"source": "src/algo/recursion/tower_of_hanoi.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/recursion/tower_of_hanoi --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/bit_manipulation/counting_bits",
+			"kind": "algorithm",
+			"title": "Given an integer n, return an array of length n+1 where the i-th element is the number of 1-bits in the binary representation of i.",
+			"source": "src/algo/bit_manipulation/counting_bits.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/bit_manipulation/counting_bits --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/bit_manipulation/reverse_bits",
+			"kind": "algorithm",
+			"title": "Given a 32-bit unsigned integer, return the integer obtained by reversing all 32 bits.",
+			"source": "src/algo/bit_manipulation/reverse_bits.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/bit_manipulation/reverse_bits --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/bit_manipulation/single_number",
+			"kind": "algorithm",
+			"title": "Given a non-empty array where every element appears twice except for one, find that single element.",
+			"source": "src/algo/bit_manipulation/single_number.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/bit_manipulation/single_number --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/sorting/merge_sort_inversions",
+			"kind": "algorithm",
+			"title": "Count the number of inversions in an array.",
+			"source": "src/algo/sorting/merge_sort_inversions.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/sorting/merge_sort_inversions --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/sorting/quickselect",
+			"kind": "algorithm",
+			"title": "Given an unsorted array and integer k, return the kth smallest element (1-indexed).",
+			"source": "src/algo/sorting/quickselect.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/sorting/quickselect --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/math/is_prime",
+			"kind": "algorithm",
+			"title": "Given an integer n, return whether n is prime.",
+			"source": "src/algo/math/is_prime.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/math/is_prime --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/math/sieve_of_eratosthenes",
+			"kind": "algorithm",
+			"title": "Given a non-negative integer n, return every prime number less than or equal to n, in increasing order.",
+			"source": "src/algo/math/sieve_of_eratosthenes.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/math/sieve_of_eratosthenes --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "algorithm/patterns/sliding_window",
+			"kind": "algorithm",
+			"title": "Sliding window pattern template.",
+			"source": "src/algo/patterns/sliding_window.py",
+			"modes": [
+				"study",
+				"implement",
+				"tests-first",
+				"talk",
+				"board",
+				"mock"
+			],
+			"duration": 30,
+			"entrypoint": "just session start algorithm/patterns/sliding_window --mode study --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "concept/advanced_typing",
+			"kind": "concept",
+			"title": "Modern Python type-system demonstrations (3.12 - 3.14).",
+			"source": "src/concepts/advanced_typing.py",
+			"modes": [
+				"read"
+			],
+			"duration": 30,
+			"entrypoint": "just session start concept/advanced_typing --mode read --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "concept/benchmarking",
+			"kind": "concept",
+			"title": "benchmarking",
+			"source": "src/concepts/benchmarking.py",
+			"modes": [
+				"read"
+			],
+			"duration": 30,
+			"entrypoint": "just session start concept/benchmarking --mode read --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "concept/fft_dct",
+			"kind": "concept",
+			"title": "FFT and DCT — frequency-domain signal processing with NumPy/SciPy.",
+			"source": "src/concepts/fft_dct.py",
+			"modes": [
+				"read"
+			],
+			"duration": 30,
+			"entrypoint": "just session start concept/fft_dct --mode read --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "concept/hypothesis_patterns",
+			"kind": "concept",
+			"title": "Systems-under-test for Hypothesis property-based testing patterns.",
+			"source": "src/concepts/hypothesis_patterns.py",
+			"modes": [
+				"read"
+			],
+			"duration": 30,
+			"entrypoint": "just session start concept/hypothesis_patterns --mode read --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "concept/modern_flask",
+			"kind": "concept",
+			"title": "Modern Flask 3.x patterns — app factory, blueprints, middleware.",
+			"source": "src/concepts/modern_flask.py",
+			"modes": [
+				"read"
+			],
+			"duration": 30,
+			"entrypoint": "just session start concept/modern_flask --mode read --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "concept/t_strings",
+			"kind": "concept",
+			"title": "PEP 750 Template Strings (t-strings) — Python 3.14's most impactful feature.",
+			"source": "src/concepts/t_strings.py",
+			"modes": [
+				"read"
+			],
+			"duration": 30,
+			"entrypoint": "just session start concept/t_strings --mode read --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "concept/validation",
+			"kind": "concept",
+			"title": "Pydantic v2 schema validation — with inline Zod (TypeScript) comparisons.",
+			"source": "src/concepts/validation.py",
+			"modes": [
+				"read"
+			],
+			"duration": 30,
+			"entrypoint": "just session start concept/validation --mode read --minutes 30",
+			"availability": "available"
+		},
+		{
+			"id": "advanced/code_reading/ex01_caching_service",
+			"kind": "advanced",
+			"title": "Exercise 1: Caching Service",
+			"source": "src/practice/code_reading/ex01_caching_service.py",
+			"modes": [
+				"read"
+			],
+			"duration": 60,
+			"entrypoint": "just session start advanced/code_reading/ex01_caching_service --mode read --minutes 60",
+			"availability": "available"
+		},
+		{
+			"id": "advanced/code_reading/ex02_flight_data_pipeline",
+			"kind": "advanced",
+			"title": "Exercise 2: Flight Data Pipeline",
+			"source": "src/practice/code_reading/ex02_flight_data_pipeline.py",
+			"modes": [
+				"read"
+			],
+			"duration": 60,
+			"entrypoint": "just session start advanced/code_reading/ex02_flight_data_pipeline --mode read --minutes 60",
+			"availability": "available"
+		},
+		{
+			"id": "advanced/code_reading/ex03_rate_limiter",
+			"kind": "advanced",
+			"title": "Exercise 3: Rate Limiter",
+			"source": "src/practice/code_reading/ex03_rate_limiter.py",
+			"modes": [
+				"read"
+			],
+			"duration": 60,
+			"entrypoint": "just session start advanced/code_reading/ex03_rate_limiter --mode read --minutes 60",
+			"availability": "available"
+		},
+		{
+			"id": "advanced/decomposition/ex02_vehicle_tracking",
+			"kind": "advanced",
+			"title": "Problem Decomposition: Real-Time Vehicle Tracking System",
+			"source": "src/practice/decomposition/ex02_vehicle_tracking.md",
+			"modes": [
+				"read"
+			],
+			"duration": 60,
+			"entrypoint": "just session start advanced/decomposition/ex02_vehicle_tracking --mode read --minutes 60",
+			"availability": "available"
+		},
+		{
+			"id": "reference/01-python-stdlib",
+			"kind": "reference",
+			"title": "Python Standard Library Cheat Sheet (Page 1 of 2)",
+			"source": "reference-sheets/01-python-stdlib.md",
+			"modes": [
+				"read"
+			],
+			"duration": 15,
+			"entrypoint": "just session start reference/01-python-stdlib --mode read --minutes 15",
+			"availability": "available"
+		},
+		{
+			"id": "reference/02-data-structures",
+			"kind": "reference",
+			"title": "Data Structures Reference (Page 1 of 2)",
+			"source": "reference-sheets/02-data-structures.md",
+			"modes": [
+				"read"
+			],
+			"duration": 15,
+			"entrypoint": "just session start reference/02-data-structures --mode read --minutes 15",
+			"availability": "available"
+		},
+		{
+			"id": "reference/03-algorithm-templates",
+			"kind": "reference",
+			"title": "Algorithm Templates (Page 1 of 4)",
+			"source": "reference-sheets/03-algorithm-templates.md",
+			"modes": [
+				"read"
+			],
+			"duration": 15,
+			"entrypoint": "just session start reference/03-algorithm-templates --mode read --minutes 15",
+			"availability": "available"
+		},
+		{
+			"id": "reference/04-big-o-complexity",
+			"kind": "reference",
+			"title": "Big-O Complexity Reference (1 page)",
+			"source": "reference-sheets/04-big-o-complexity.md",
+			"modes": [
+				"read"
+			],
+			"duration": 15,
+			"entrypoint": "just session start reference/04-big-o-complexity --mode read --minutes 15",
+			"availability": "available"
+		},
+		{
+			"id": "reference/05-common-patterns",
+			"kind": "reference",
+			"title": "Common Patterns Quick Reference (1 page)",
+			"source": "reference-sheets/05-common-patterns.md",
+			"modes": [
+				"read"
+			],
+			"duration": 15,
+			"entrypoint": "just session start reference/05-common-patterns --mode read --minutes 15",
+			"availability": "available"
+		},
+		{
+			"id": "reference/06-system-design",
+			"kind": "reference",
+			"title": "System Design Reference Sheet",
+			"source": "reference-sheets/06-system-design.md",
+			"modes": [
+				"read"
+			],
+			"duration": 15,
+			"entrypoint": "just session start reference/06-system-design --mode read --minutes 15",
+			"availability": "available"
+		},
+		{
+			"id": "reference/07-interview-day-guide",
+			"kind": "reference",
+			"title": "Interview Day Guide",
+			"source": "reference-sheets/07-interview-day-guide.md",
+			"modes": [
+				"read"
+			],
+			"duration": 15,
+			"entrypoint": "just session start reference/07-interview-day-guide --mode read --minutes 15",
+			"availability": "available"
+		},
+		{
+			"id": "reference/08-cross-reference-guide",
+			"kind": "reference",
+			"title": "Cross-Reference Guide — Pattern → Implementation Map",
+			"source": "reference-sheets/08-cross-reference-guide.md",
+			"modes": [
+				"read"
+			],
+			"duration": 15,
+			"entrypoint": "just session start reference/08-cross-reference-guide --mode read --minutes 15",
+			"availability": "available"
+		},
+		{
+			"id": "reference/09-python-314-and-modern-patterns",
+			"kind": "reference",
+			"title": "Python 3.14, Modern Typing, and Advanced Patterns",
+			"source": "reference-sheets/09-python-314-and-modern-patterns.md",
+			"modes": [
+				"read"
+			],
+			"duration": 15,
+			"entrypoint": "just session start reference/09-python-314-and-modern-patterns --mode read --minutes 15",
+			"availability": "available"
+		},
+		{
+			"id": "method/10-whiteboard-performance-protocol",
+			"kind": "method",
+			"title": "Whiteboard Performance & Panic Protocol",
+			"source": "reference-sheets/10-whiteboard-performance-protocol.md",
+			"modes": [
+				"read"
+			],
+			"duration": 15,
+			"entrypoint": "just session start method/10-whiteboard-performance-protocol --mode read --minutes 15",
+			"availability": "available"
+		},
+		{
+			"id": "reference/11-14-day-whiteboard-ramp",
+			"kind": "reference",
+			"title": "14-Day Interview Practice Ramp",
+			"source": "reference-sheets/11-14-day-whiteboard-ramp.md",
+			"modes": [
+				"read"
+			],
+			"duration": 15,
+			"entrypoint": "just session start reference/11-14-day-whiteboard-ramp --mode read --minutes 15",
+			"availability": "available"
+		},
+		{
+			"id": "review/due",
+			"kind": "review",
+			"title": "Choose a due problem from your private spaced-review queue",
+			"source": "scripts/study_schedule.py",
+			"modes": [
+				"review"
+			],
+			"duration": 15,
+			"entrypoint": "just session start review/due --mode review --minutes 15",
+			"availability": "available"
+		},
+		{
+			"id": "contribution/guide",
+			"kind": "contribution",
+			"title": "Contributing",
+			"source": "CONTRIBUTING.md",
+			"modes": [
+				"contribute"
+			],
+			"duration": 30,
+			"entrypoint": "just session start contribution/guide --mode contribute --minutes 30",
+			"availability": "available"
+		}
+	]
+}

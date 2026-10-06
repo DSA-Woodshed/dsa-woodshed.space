@@ -1,21 +1,334 @@
 """
-Root BUILD.bazel for dsa-woodshed.space.
+Root BUILD.bazel for the DSA Woodshed public scaffold.
 
-The SvelteKit static site keeps its ergonomic pnpm-backed Justfile
-recipes; Bazel owns the module-graph / lockfile-translation proof
-surface only (`//:node_modules` materialized from pnpm-lock.yaml).
+Just is the operator entrypoint; these finite Bazel targets own local and CI
+build, check, test, development, and analysis execution.
 """
 
+load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
+load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_run_binary", "js_test")
+load("@aspect_rules_js//npm:defs.bzl", "npm_link_package")
 load("@npm//:defs.bzl", "npm_link_all_packages")
+load("@npm//:eslint/package_json.bzl", eslint_bin = "bin")
+load("@npm//:prettier/package_json.bzl", prettier_bin = "bin")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 
 npm_link_all_packages(name = "node_modules")
 
-exports_files(
-    [
-        ".npmrc",
+# Public first-party packages are graph-linked from immutable registry modules.
+npm_link_package(
+    name = "node_modules/@tummycrypt/vite-plugin-a11y",
+    src = "@tummycrypt_vite_plugin_a11y//:pkg",
+)
+npm_link_package(
+    name = "node_modules/@tummycrypt/vite-plugin-skeleton-colors",
+    src = "@tummycrypt_vite_plugin_skeleton_colors//:pkg",
+)
+npm_link_package(
+    name = "node_modules/@tummycrypt/tinyland-color-utils",
+    src = "@tummycrypt_tinyland_color_utils//:pkg",
+)
+npm_link_package(
+    name = "node_modules/@tummycrypt/tinyvectors",
+    src = "@tummycrypt_tinyvectors//:pkg",
+)
+
+npm_link_package(name = "node_modules/@xoxd/public-chrome", src = "@xoxd_public_chrome//:pkg")
+npm_link_package(name = "node_modules/@xoxd/theme", src = "@xoxd_theme//:pkg")
+
+TINYLAND_HOUSE_PACKAGES = [
+    ":node_modules/@xoxd/public-chrome",
+    ":node_modules/@xoxd/theme",
+    ":node_modules/@tummycrypt/vite-plugin-a11y",
+    ":node_modules/@tummycrypt/vite-plugin-skeleton-colors",
+    ":node_modules/@tummycrypt/tinyland-color-utils",
+    ":node_modules/@tummycrypt/tinyvectors",
+]
+
+# Direct npm links keep the static adapter and its dependencies bounded.
+APP_NPM_PACKAGES = [
+    ":node_modules/@fontsource/inter",
+    ":node_modules/@lucide/svelte",
+    ":node_modules/@skeletonlabs/skeleton",
+    ":node_modules/@skeletonlabs/skeleton-svelte",
+    ":node_modules/@sveltejs/adapter-static",
+    ":node_modules/@sveltejs/kit",
+    ":node_modules/@sveltejs/vite-plugin-svelte",
+    ":node_modules/@tailwindcss/vite",
+    ":node_modules/@types/node",
+    ":node_modules/mdsvex",
+    ":node_modules/mermaid-isomorphic",
+    ":node_modules/playwright",
+    ":node_modules/pagefind",
+    ":node_modules/rollup-plugin-visualizer",
+    ":node_modules/shiki",
+    ":node_modules/svelte",
+    ":node_modules/tailwindcss",
+    ":node_modules/typescript",
+    ":node_modules/vite",
+] + TINYLAND_HOUSE_PACKAGES
+
+LINT_NPM_PACKAGES = [
+    ":node_modules/@eslint/js",
+    ":node_modules/eslint",
+    ":node_modules/eslint-config-prettier",
+    ":node_modules/eslint-plugin-svelte",
+    ":node_modules/globals",
+    ":node_modules/prettier",
+    ":node_modules/prettier-plugin-svelte",
+    ":node_modules/svelte",
+    ":node_modules/typescript",
+    ":node_modules/typescript-eslint",
+]
+
+TYPECHECK_NPM_PACKAGES = APP_NPM_PACKAGES + [
+    ":node_modules/svelte-check",
+    ":node_modules/vitest",
+]
+
+UNIT_TEST_NPM_PACKAGES = APP_NPM_PACKAGES + [
+    ":node_modules/@vitest/coverage-v8",
+    ":node_modules/vitest",
+]
+
+filegroup(
+    name = "app_srcs",
+    srcs = glob(["src/**", "static/**", "scripts/**/*.mjs", "scripts/**/*.mts", "scripts/**/*.sh", ".github/workflows/*.yml"], exclude = ["static/fonts/**"], allow_empty = True) + [
+        ".npmrc", ".prettierrc", "BUILD.bazel", "Justfile", "README.md", "CONTRIBUTING.md",
+        "scripts/check-repo-profile.py", "package.json", "playwright.config.ts", "pnpm-lock.yaml",
+        "pnpm-workspace.yaml", "svelte.config.js", "tsconfig.json", "vite.config.ts", "vitest.config.ts",
+    ],
+)
+
+# Mirror the repo-wide Prettier surface (subject to .prettierignore) inside the
+# finite Bazel test sandbox. Hidden workflow/config trees need explicit globs.
+filegroup(
+    name = "format_srcs",
+    srcs = glob(
+        [
+            ".github/**/*.json",
+            ".githooks/**/*.json",
+            ".github/**/*.yaml",
+            ".github/**/*.yml",
+            "config/**/*.json",
+            "docs/**/*.json",
+            "e2e/**/*.ts",
+            "scripts/**/*.js",
+            "scripts/**/*.json",
+            "scripts/**/*.mjs",
+            "scripts/**/*.mts",
+            "src/**/*.css",
+            "src/**/*.html",
+            "src/**/*.js",
+            "src/**/*.json",
+            "src/**/*.svelte",
+            "src/**/*.ts",
+        ],
+        allow_empty = True,
+    ) + [
+        ".prettierignore",
+        ".prettierrc",
+        "eslint.config.ts",
         "package.json",
-        "pnpm-lock.yaml",
+        "playwright.config.ts",
         "pnpm-workspace.yaml",
+        "svelte.config.js",
+        "tinyland.repo.json",
+        "tsconfig.json",
+        "vite.config.ts",
+        "vitest.config.ts",
+    ],
+)
+
+filegroup(
+    name = "e2e_srcs",
+    srcs = glob(["e2e/**"], allow_empty = True),
+)
+
+js_binary(
+    name = "sveltekit_sync_bin",
+    data = APP_NPM_PACKAGES,
+    entry_point = "scripts/bazel/run-sveltekit-sync.mjs",
+)
+
+js_run_binary(
+    name = "sveltekit_types",
+    srcs = [":app_srcs"],
+    out_dirs = [".svelte-kit"],
+    tool = ":sveltekit_sync_bin",
+)
+
+# Keep sources and their extended tsconfig in one declared tree. Build and test
+# wrappers dereference this input into action-local scratch so Oxc's canonical
+# paths never escape to the Bazel execroot while resolving tsconfig.json.
+copy_to_directory(
+    name = "app_workspace",
+    srcs = [
+        ":app_srcs",
+        ":sveltekit_types",
+        "MODULE.bazel",
+        # The leak scanner (scripts/lib/leak-scan.mjs) reads the repository's
+        # own owner/repo from the manifest, so the unit suite needs it in the
+        # declared workspace.
+        "tinyland.repo.json",
+    ],
+    hardlink = "off",
+    root_paths = ["."],
+)
+
+js_binary(
+    name = "svelte_check_bin",
+    patch_node_fs = False,
+    data = TYPECHECK_NPM_PACKAGES,
+    entry_point = "scripts/bazel/run-svelte-check.mjs",
+    tags = [
+        "manual",
+    ],
+)
+
+js_test(
+    name = "svelte_check_test",
+    data = [
+        ":app_srcs",
+        ":sveltekit_types",
+    ] + TYPECHECK_NPM_PACKAGES,
+    entry_point = "scripts/bazel/run-svelte-check.mjs",
+    timeout = "long",
+)
+
+# Lint runs against declared sources and generated SvelteKit metadata.
+eslint_bin.eslint_test(
+    name = "eslint_test",
+    args = ["."],
+    data = [
+        ":app_srcs",
+        ":e2e_srcs",
+        ":sveltekit_types",
+        "eslint.config.ts",
+    ] + LINT_NPM_PACKAGES,
+    timeout = "moderate",
+)
+
+# Formatting is a read-only test against the declared repository surface.
+prettier_bin.prettier_test(
+    name = "prettier_check_test",
+    args = [
+        "--check",
+        ".",
+    ],
+    data = [
+        ":format_srcs",
+    ] + [
+        ":node_modules/prettier",
+        ":node_modules/prettier-plugin-svelte",
+        ":node_modules/svelte",
+    ],
+    timeout = "short",
+)
+
+js_binary(
+    name = "vite_build_bin",
+    data = APP_NPM_PACKAGES,
+    entry_point = "scripts/bazel/run-vite-build.mjs",
+)
+
+js_run_binary(
+    name = "build",
+    args = [
+        "--workspace",
+        "$(rootpath :app_workspace)",
+        "--output-dir",
+        "build",
+    ],
+    srcs = [":app_workspace"],
+    out_dirs = ["build"],
+    patch_node_fs = False,
+    use_default_shell_env = True,
+    stamp = 1,
+    tool = ":vite_build_bin",
+    visibility = ["//visibility:public"],
+)
+
+js_run_binary(
+    name = "analyze",
+    args = [
+        "--workspace",
+        "$(rootpath :app_workspace)",
+        "--output-dir",
+        "build-analyze",
+        "--analyze",
+        "--analyze-output",
+        ".bundle-stats/stats.html",
+    ],
+    out_dirs = ["build-analyze", ".bundle-stats"],
+    patch_node_fs = False,
+    use_default_shell_env = True,
+    srcs = [":app_workspace"],
+    stamp = 1,
+    tool = ":vite_build_bin",
+    visibility = ["//visibility:public"],
+)
+
+js_binary(
+    name = "dev",
+    patch_node_fs = False,
+    data = APP_NPM_PACKAGES,
+    entry_point = "scripts/bazel/run-vite-dev.mjs",
+    tags = [
+        "manual",
     ],
     visibility = ["//visibility:public"],
 )
+
+js_test(
+    name = "unit_tests",
+    data = [
+        ":app_workspace",
+        "scripts/bazel/prepare-sveltekit-types.mjs",
+    ] + UNIT_TEST_NPM_PACKAGES,
+    args = [
+        "--workspace",
+        "$(rootpath :app_workspace)",
+        "run",
+        "--reporter=verbose",
+        "--config",
+        "vitest.config.ts",
+    ],
+    entry_point = "scripts/bazel/run-vitest.mjs",
+    tags = [
+        "vitest",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+js_binary(
+    name = "vitest_coverage_bin",
+    data = [
+        "scripts/bazel/prepare-sveltekit-types.mjs",
+    ] + UNIT_TEST_NPM_PACKAGES,
+    entry_point = "scripts/bazel/run-vitest.mjs",
+)
+
+js_run_binary(
+    name = "unit_test_coverage",
+    args = [
+        "--workspace",
+        "$(rootpath :app_workspace)",
+        "--coverage-output",
+        "coverage",
+        "run",
+        "--reporter=verbose",
+        "--config",
+        "vitest.config.ts",
+    ],
+    out_dirs = ["coverage"],
+    srcs = [":app_workspace"],
+    tags = [
+        "manual",
+    ],
+    tool = ":vitest_coverage_bin",
+)
+
+test_suite(name = "lint_suite", tests = [":eslint_test", ":prettier_check_test"])
+test_suite(name = "local_validation_suite", tests = [":svelte_check_test", ":unit_tests", ":eslint_test", ":prettier_check_test"])
+pkg_tar(name = "deployment_bundle", srcs = [":build"], extension = "tar.gz", visibility = ["//visibility:public"])

@@ -3,57 +3,47 @@
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
-	"description": "The DSA Woodshed — a static SvelteKit reading surface for the DSA study packet (Skeleton 4 + Tailwind v4 + mdsvex).",
+	"description": "The DSA Woodshed: guided practice and reference reading with the public xoxd.ai scaffold.",
 	"license": "MIT",
 	"packageManager": "pnpm@10.13.1",
 	"engines": {
-		"node": ">=22 <25"
+		"node": ">=22 <23"
 	},
 	"scripts": {
-		"prepare": "node scripts/build-tinyvectors.mjs",
-		"sync-content": "node scripts/sync-content.mjs",
-		"dev": "vite dev",
-		"prebuild": "pnpm run verify:content-sync",
-		"build": "vite build",
-		"postbuild": "pnpm run verify:booklet-build && pnpm run build:search && pnpm run verify:search-index && pnpm run verify:diagrams",
-		"build:search": "pagefind --site build",
+		"dev": "just dev",
+		"build": "just build",
+		"preview": "just preview",
+		"check": "just typecheck",
+		"check:watch": "just typecheck-watch",
+		"lint": "just lint",
+		"format": "just format",
+		"format:check": "just format-check",
+		"test": "just test",
+		"test:unit": "just test",
+		"test:coverage": "just test-coverage",
+		"test:e2e": "just e2e",
+		"sync-content": "just sync-content",
+		"verify:content-sync": "node scripts/verify-content-sync.mjs",
 		"verify:booklet": "node scripts/sync-booklet.mjs --verify",
 		"verify:booklet-build": "node scripts/sync-booklet.mjs --verify-build",
 		"verify:search-index": "node scripts/verify-search-index.mjs",
 		"verify:diagrams": "node scripts/verify-diagrams.mjs",
-		"verify:content-sync": "node scripts/verify-content-sync.mjs",
 		"verify:repo-profile": "python3 scripts/check-repo-profile.py",
-		"preview": "vite preview",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"lint": "prettier --check . && eslint . && python3 scripts/check-inhouse-package-parity.py && pnpm run verify:repo-profile",
-		"format": "prettier --write .",
-		"format:check": "prettier --check .",
-		"test": "vitest",
-		"test:unit": "vitest run",
-		"test:coverage": "vitest run --coverage",
-		"test:e2e": "playwright test",
-		"optimize:images": "node scripts/optimize-images.js",
-		"analyze": "ANALYZE=1 vite build"
+		"analyze": "just analyze"
 	},
 	"dependencies": {
-		"@fontsource-variable/fraunces": "^5.3.0",
-		"@fontsource/crimson-pro": "^5.3.0",
 		"@fontsource/inter": "^5.3.0",
-		"@lucide/svelte": "^1.30.0",
-		"@tummycrypt/tinyvectors": "https://github.com/tinyland-inc/tinyvectors/archive/refs/tags/v0.3.6.tar.gz",
-		"effect": "^3.22.1"
+		"@lucide/svelte": "^1.30.0"
 	},
 	"devDependencies": {
+		"@eslint/js": "9.39.5",
 		"@playwright/test": "^1.62.1",
-		"@skeletonlabs/skeleton": "4.15.2",
-		"@skeletonlabs/skeleton-svelte": "4.15.2",
+		"@skeletonlabs/skeleton": "5.0.1",
+		"@skeletonlabs/skeleton-svelte": "5.0.1",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.70.2",
 		"@sveltejs/vite-plugin-svelte": "^7.3.0",
 		"@tailwindcss/vite": "^4.3.3",
-		"@tummycrypt/vite-plugin-a11y": "0.2.2",
-		"@tummycrypt/vite-plugin-skeleton-colors": "0.2.2",
 		"@types/node": "^22.20.1",
 		"@vitest/coverage-v8": "^4.1.10",
 		"eslint": "^9.39.5",
@@ -67,24 +57,18 @@
 		"prettier": "^3.9.6",
 		"prettier-plugin-svelte": "^4.1.1",
 		"rollup-plugin-visualizer": "^7.0.1",
-		"serve": "^14.2.6",
-		"sharp": "^0.35.3",
 		"shiki": "^4.4.2",
 		"svelte": "^5.56.8",
 		"svelte-check": "^4.7.5",
-		"svgo": "^4.0.2",
 		"tailwindcss": "^4.3.3",
-		"tsx": "^4.23.11",
 		"typescript": "6.0.3",
 		"typescript-eslint": "^8.66.0",
 		"vite": "^8.2.1",
 		"vitest": "^4.1.10"
 	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"@tailwindcss/oxide",
-			"esbuild",
-			"sharp"
-		]
+	"homepage": "https://dsa-woodshed.space",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/DSA-Woodshed/dsa-woodshed.space.git"
 	}
 }

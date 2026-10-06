@@ -4,6 +4,6 @@
 // needs to resolve against the commit that built and deployed *this*
 // presentation repo, so it gets its own tiny constant instead of overloading
 // $lib/repo's meaning.
-export const SITE_REPO_SLUG = 'Jesssullivan/dsa-woodshed.space';
+export const SITE_REPO_SLUG = 'DSA-Woodshed/dsa-woodshed.space';
 
 export const SITE_REPO_URL = `https://github.com/${SITE_REPO_SLUG}`;

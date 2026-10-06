@@ -12,7 +12,7 @@ describe('public product surface', () => {
 	it('leads with ordinary comments and keeps named frameworks optional', () => {
 		const home = read('src/routes/+page.svelte');
 		expect(home).toContain('Start with ordinary comments');
-		expect(home).toMatch(/There are no\s+required prefixes or labels\./);
+		expect(home).toMatch(/There are no\s+required prefixes\s+or labels\./);
 		expect(home).toMatch(/the same\s+loop\s+with\s+optional\s+labels/);
 		expect(home).not.toContain('Pick the labels that help you think');
 	});
@@ -24,45 +24,35 @@ describe('public product surface', () => {
 		expect(home).not.toContain('mt-8 grid gap-4 md:grid-cols-2');
 	});
 
-	it('keeps study separate from a rep and runs tests only on request', () => {
+	it('keeps study separate from a rep and leaves tests explicit', () => {
 		const home = read('src/routes/+page.svelte');
-		expect(home).toContain('runs focused tests when you ask');
+		expect(home).toContain('Starting or resuming a session does not run tests.');
 		expect(home).toMatch(/Study a committed solution and its reference tests before a rep/);
 		expect(home).toMatch(/open without starting a rep/);
 		expect(home).not.toContain('runs the focused tests');
 	});
 
-	it('serves the packet agent map without restating its evolving command surface', () => {
-		const page = read('src/routes/agent/+page.svelte');
-		const agentMap = read('static/agent-map.md');
-		const manifest = JSON.parse(read('src/content/.manifest.json')) as {
-			agentMap: { input: string; out: string; sha256: string };
-		};
-
-		expect(page).toContain('agentMapMetadata.out');
-		expect(page).toContain('agentMapMetadata.input');
-		expect(page).not.toContain('just practice-start comments|reacto|clarp|umpire');
-		expect(manifest.agentMap).toEqual({
-			input: 'agent-map.md',
-			out: 'static/agent-map.md',
-			sha256: sha256(agentMap),
-		});
+	it('uses the packet capability inventory and redirects retired orientation URLs', () => {
+		const manifest = JSON.parse(read('src/content/.manifest.json'));
+		expect(manifest.schemaVersion).toBe(2);
+		expect(manifest.agentMap).toBeUndefined();
+		expect(manifest.capabilities.sha256).toBe(sha256(read('static/capabilities.json')));
+		expect(read('src/routes/agent/+page.ts')).toContain("redirect(308, '/project')");
 	});
 
 	it('keeps Project in the documented information architecture', () => {
 		const readme = read('README.md');
 		const sitemap = read('src/routes/sitemap.xml/+server.ts');
-		expect(readme).toContain('**Project** is a concise public landing that links the source-of-truth');
+		expect(readme).toMatch(/\*\*Project\*\* is\s+a concise public landing that links the source-of-truth/);
 		expect(sitemap).toContain('PROJECT_ROUTE');
 	});
 
 	it('states the runnable language-track boundary without placeholder claims', () => {
 		const project = read('src/routes/project/+page.svelte');
 		expect(project).toContain('Python is the only runnable track today.');
-		expect(project).toMatch(
-			/R, TypeScript, and C\+\+ are inert provisional reservations;\s+Rust\s+is\s+exploratory and not runnable\./,
+		expect(project.replace(/\s+/g, ' ')).toContain(
+			'Future languages need their own justified curriculum and working exercises.',
 		);
-		expect(project).toContain('They remain inactive until the interview cycle is explicitly declared complete.');
 		expect(project).not.toContain('future work, not stubs');
 	});
 

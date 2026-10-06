@@ -3,30 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-// Selected frontend-stack pin contract.
-//
-// This site historically inherited these exact pins from site.scaffold. This
-// test owns the selected constraints locally; it does not imply wholesale
-// scaffold conformance or a shared release train.
-//
-// The locally selected invariants:
-// - Skeleton + skeleton-svelte are EXACT `4.15.2`. Skeleton v5 IS GA upstream
-//   (`5.0.0`, not just a `-next.*` prerelease) as of this writing, but the v4→v5
-//   jump is a breaking major (new theming/component APIs) and this repo is
-//   deliberately deferring that migration to its own scoped follow-up rather
-//   than absorbing it as a drive-by dependency bump. A "bump to v5" PR must
-//   fail here first, before anything visual, until that follow-up lands; see
-//   the dependabot ignore rule for this pair in .github/dependabot.yml (the
-//   reason recreating dependency PRs like #20/#21 stopped).
-// - `typescript` is EXACT-pinned on the 6.0.x line (the one real manifest
-//   major); it must never float behind a caret/tilde.
-// - pnpm is `10.13.1` EXACT via corepack — never pnpm 9.
-// - The icon identity is the SCOPED `@lucide/svelte` 1.x; the unscoped
-//   `lucide-svelte` package is retired and must not reappear in any form.
-// - `@zag-js` is consumed transitively through Skeleton, never as a direct dep.
-//
-// `package.json` and this test move together: an intentional pin change edits
-// both in the same commit.
+// The public scaffold and its executable pin contract move together.
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const packageJson = JSON.parse(readFileSync(path.join(repoRoot, 'package.json'), 'utf8')) as {
@@ -46,13 +23,13 @@ const allDeclaredDeps: Record<string, string> = {
 };
 
 describe('selected frontend-stack exact-pin contract', () => {
-	it('keeps Skeleton + skeleton-svelte EXACT at 4.15.2 (no phantom v5)', () => {
-		expect(packageJson.devDependencies?.['@skeletonlabs/skeleton']).toBe('4.15.2');
-		expect(packageJson.devDependencies?.['@skeletonlabs/skeleton-svelte']).toBe('4.15.2');
+	it('keeps Skeleton + skeleton-svelte EXACT at 5.0.1', () => {
+		expect(packageJson.devDependencies?.['@skeletonlabs/skeleton']).toBe('5.0.1');
+		expect(packageJson.devDependencies?.['@skeletonlabs/skeleton-svelte']).toBe('5.0.1');
 	});
 
-	it('keeps typescript EXACT-pinned on the 6.0.x line (no caret/tilde float)', () => {
-		expect(packageJson.devDependencies?.typescript).toMatch(/^6\.0\.\d+$/);
+	it('keeps TypeScript exactly pinned to the selected scaffold version', () => {
+		expect(packageJson.devDependencies?.typescript).toBe('6.0.3');
 	});
 
 	it('keeps pnpm 10.13.1 EXACT via packageManager (never pnpm 9)', () => {
@@ -70,10 +47,13 @@ describe('selected frontend-stack exact-pin contract', () => {
 	});
 
 	it('keeps the Node 22 engines window', () => {
-		expect(packageJson.engines?.node).toBe('>=22 <25');
+		expect(packageJson.engines?.node).toBe('>=22 <23');
 	});
 
-	// The retained Bazel lane proves module-graph resolution and in-house package
-	// pin parity only. It does not own a separate TypeScript version: package.json
-	// and this test remain the exact TypeScript pin authority.
+	it('keeps the Bazel toolchains on the same selected pins', () => {
+		const module = readFileSync(path.join(repoRoot, 'MODULE.bazel'), 'utf8');
+		expect(module).toContain('ts_version = "6.0.3"');
+		expect(module).toContain('node_version = "22.13.1"');
+		expect(module).toContain('pnpm_version = "10.13.1"');
+	});
 });

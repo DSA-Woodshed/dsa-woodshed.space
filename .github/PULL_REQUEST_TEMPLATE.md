@@ -10,12 +10,12 @@
 - [ ] `pnpm run build` succeeds
 - [ ] `pnpm run test:e2e` is green (or n/a)
 - [ ] No new gitleaks findings
-- [ ] Skeleton `4.15.2` exact pin preserved (no v5 or prerelease drift)
+- [ ] Skeleton `5.0.1`, TypeScript `6.0.3`, and pnpm `10.13.1` exact pins match the stack tests
 
 ## Content changes
 
 <!-- If this touches a reference sheet or guide, note that the source of truth is
-     the study-packet repo (Jesssullivan/dsa-study-packet) and link the upstream edit. -->
+     the study-packet repo (DSA-Woodshed/dsa-study-packet) and link the upstream edit. -->
 
 ## Risk
 

@@ -12,7 +12,7 @@ function expectPinnedPacketCheckout(workflow: string) {
 	const readLock = workflow.indexOf('id: packet-lock');
 	const packetCheckout = workflow.indexOf('name: Check out the study packet');
 	const verifyCheckout = workflow.indexOf('name: Verify the locked packet checkout');
-	const sync = workflow.indexOf('run: pnpm run sync-content');
+	const sync = workflow.indexOf('run: nix develop --command just sync-content');
 	const verifyGenerated = workflow.indexOf('name: Verify the packet lock reproduced exactly');
 
 	expect(readLock).toBeGreaterThan(-1);
@@ -23,7 +23,7 @@ function expectPinnedPacketCheckout(workflow: string) {
 	expect(workflow).toContain('repository: ${{ steps.packet-lock.outputs.repository }}');
 	expect(workflow).toContain('ref: ${{ steps.packet-lock.outputs.commit }}');
 	expect(workflow).toContain('${{ steps.packet-lock.outputs.booklet_digest }}');
-	expect(workflow).toContain('git diff --exit-code -- src/content/.manifest.json static/agent-map.md');
+	expect(workflow).toContain('git diff --exit-code -- src/content/.manifest.json static/capabilities.json');
 	expect(workflow).not.toContain('repository: Jesssullivan/dsa-study-packet');
 }
 
@@ -36,26 +36,27 @@ describe('packet lock workflow contract', () => {
 	it('keeps the full CI matrix on the bounded GitHub-hosted bridge', () => {
 		expect(ci).not.toContain('runs-on: tinyland-docker');
 		expect(pages).not.toContain('runs-on: tinyland-docker');
-		expect(ci.match(/runs-on: ubuntu-latest/g)).toHaveLength(2);
+		expect(ci.match(/runs-on: ubuntu-latest/g)).toHaveLength(1);
 		expect(pages.match(/runs-on: ubuntu-latest/g)).toHaveLength(2);
-		for (const command of ['just test', 'pnpm run check', 'pnpm run lint', 'pnpm run build', 'pnpm run test:e2e']) {
+		for (const command of ['just gate', 'pnpm exec playwright test']) {
 			expect(ci).toContain(command);
 		}
-		expect(ci).toContain('playwright install --with-deps chromium');
-		expect(pages).toContain('playwright install --with-deps chromium');
+		expect(ci).toContain('nix develop .#playwright');
+		expect(pages).toContain('nix develop .#playwright');
 	});
 
 	it('orders Pages deployment and verifies the exact public receipt', () => {
 		expect(pages).toContain('group: github-pages-production');
 		expect(pages).toContain('cancel-in-progress: true');
 		expect(pages).toContain('Refuse an out-of-date main deployment');
-		expect(pages).toContain('deployment-receipt.mjs --write');
+		expect(pages).toContain("github.repository == 'DSA-Woodshed/dsa-woodshed.space'");
 		expect(pages).toContain('Verify production serves this exact site and packet pair');
 		expect(pages).toContain('deployment-receipt.mjs --verify-url');
 	});
 
 	it('exposes one explicit maintainer lock-advancement recipe', () => {
-		expect(justfile).toMatch(/^packet-lock sha:\n\tnode scripts\/packet-lock\.mjs "{{sha}}"$/m);
+		expect(justfile).toContain('packet-lock sha booklet_metadata="":');
+		expect(justfile).toContain('lock_args+=(--booklet-metadata {{quote(booklet_metadata)}})');
 		expect(syncContent).not.toContain('WOODSHED_PACKET_COMMIT');
 		expect(syncContent).toContain('const sourceRepo = lock.sourceRepo;');
 		expect(syncContent).toContain('/blob/${sourceCommit}/');

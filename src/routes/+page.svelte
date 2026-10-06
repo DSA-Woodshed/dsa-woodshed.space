@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { REPO_SLUG } from '$lib/repo';
-
-	const CODESPACES_URL = `https://codespaces.new/${REPO_SLUG}?quickstart=1`;
+	import { availableCapabilities } from '$lib/capabilities';
+	const problemCount = availableCapabilities.filter((capability) => capability.kind === 'algorithm').length;
 	const BOOKLET_URL = '/printables';
 
 	const steps = [
@@ -19,7 +18,7 @@
 		},
 		{
 			title: 'Keep one correction',
-			body: 'Say /continue for the next instruction and finish with one fix.',
+			body: 'Finish with one correction to carry into the next rep.',
 		},
 	];
 
@@ -49,22 +48,20 @@
 		<h1 class="mt-3 max-w-3xl text-4xl leading-tight font-bold md:text-6xl">Woodshedding for the whiteboard.</h1>
 		<p class="text-surface-700-300 mt-6 max-w-2xl text-xl leading-relaxed font-semibold">
 			Musicians woodshed: practice the hard passages alone until the performance holds under pressure. This is that room
-			for technical interviews: real problems, real code, and a resident interviewer, one click from the browser.
+			for technical interviews: real problems, real code, and a session shaped around the time you have.
 		</p>
 		<p class="text-surface-700-300 mt-4 max-w-2xl text-lg leading-relaxed">
-			You reason in ordinary <code>#</code> comments and docstrings, in the file you are solving. The interviewer checks
-			visible work through a deterministic <code>just</code> contract: it reads what you wrote, requires no format, and never
-			writes your solution or tests. The Python track ships 43 core problems, a printable booklet, and reference sheets.
+			Choose study, implementation, tests first, or a conversation before you begin. Write your reasoning in ordinary
+			<code>#</code> comments and docstrings. The Python track ships {problemCount} algorithm exercises, a printable booklet,
+			and reference sheets.
 		</p>
 
 		<div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
 			<a
-				href={CODESPACES_URL}
-				target="_blank"
-				rel="noopener"
+				href="/start"
 				class="bg-primary-500 hover:bg-primary-600 inline-flex w-fit items-center justify-center rounded-lg px-5 py-3 text-sm font-semibold text-white transition-colors"
 			>
-				Start in Codespaces
+				Choose a session
 			</a>
 			<a
 				href={BOOKLET_URL}
@@ -79,7 +76,9 @@
 				How it works
 			</a>
 		</div>
-		<p class="text-surface-500 mt-3 text-sm">No separate agent CLI or repository API key is required.</p>
+		<p class="text-surface-500 mt-3 text-sm">
+			Basic practice needs no repository API key or private-service credentials.
+		</p>
 	</header>
 
 	<section class="mt-20 border-t border-surface-200-800 pt-12" aria-labelledby="choose-mode">
@@ -87,12 +86,12 @@
 			<p class="text-primary-600 text-xs font-semibold tracking-widest uppercase">The default</p>
 			<h2 id="choose-mode" class="mt-2 text-2xl font-bold">Start with ordinary comments</h2>
 			<p class="text-surface-700-300 mt-3 leading-relaxed">
-				Enter <code>/comments</code> in Copilot Chat to start a rep. There are no required prefixes or labels.
+				Choose study or implementation, then write your reasoning in ordinary comments. There are no required prefixes
+				or labels.
 			</p>
 			<p class="text-surface-500 mt-4 text-sm">
-				Name a problem and its source and test files open at once, for example <code>/comments arrays two_sum</code>. If
-				named vocabulary helps you think, <code>/reacto</code>, <code>/clarp</code>, and <code>/umpire</code> start the same
-				loop with optional labels.
+				Choose an available problem and open its isolated source and test files. Personal interviewer integrations can
+				guide the same loop with optional labels.
 			</p>
 		</div>
 	</section>
@@ -101,7 +100,7 @@
 		<p class="text-primary-600 text-xs font-semibold tracking-widest uppercase">One clean loop</p>
 		<h2 id="rep-loop" class="mt-2 text-2xl font-bold">How a rep works</h2>
 		<p class="text-surface-700-300 mt-3 max-w-2xl leading-relaxed">
-			With nothing named, the interviewer draws the next due problem. Either way, every rep is the same four movements.
+			Choose an available capability and a time budget. For an implementation session, use these four movements.
 		</p>
 		<ol
 			class="border-surface-200-800 mt-8 list-decimal divide-y divide-surface-200-800 border-y pl-8 marker:font-mono marker:font-semibold marker:text-primary-600"
@@ -114,10 +113,11 @@
 			{/each}
 		</ol>
 		<div class="bg-surface-100-900 mt-6 rounded-lg p-5 text-sm leading-relaxed">
-			<p class="font-semibold">The interviewer conducts; you do the work.</p>
+			<p class="font-semibold">You choose when to test.</p>
 			<p class="text-surface-700-300 mt-2">
-				It opens the problem's files, reports the next state, runs focused tests when you ask, and asks interview
-				questions through the same <code>just</code> contract.
+				Starting or resuming a session does not run tests. Study keeps the committed solution and reference tests
+				intact; implementation uses an isolated candidate workspace. Start focused tests when you choose to check your
+				work.
 			</p>
 		</div>
 	</section>
@@ -125,57 +125,18 @@
 	<section class="mt-20 border-t border-surface-200-800 pt-12" aria-labelledby="why-woodshed">
 		<div class="max-w-2xl">
 			<p class="text-primary-600 text-xs font-semibold tracking-widest uppercase">The point</p>
-			<h2 id="why-woodshed" class="mt-2 text-2xl font-bold">Practice the performance, not just the algorithms</h2>
+			<h2 id="why-woodshed" class="mt-2 text-2xl font-bold">Practice explaining your work</h2>
 			<p class="text-surface-700-300 mt-3 leading-relaxed">
-				An interview is a performance under observation: a clock, a stranger, a whiteboard, no compiler. Skilled
-				engineers have cried through these rooms; mind-blank under observation is common, and volume grinding does not
-				fix it. Competence is not the gap. Regulation under observation is.
+				Solving the problem is one skill. Explaining your examples, assumptions, and corrections is another. Use an
+				untimed talk session to form a plan, a board session to narrate under a clock, or a mock session to rehearse the
+				full conversation.
 			</p>
 			<p class="text-surface-700-300 mt-4 leading-relaxed">
-				The answer here is structural: a resident interviewer that checks you showed your work, never that you were a
-				genius, running a deterministic practice loop that reads your ordinary comments instead of demanding formats. It
-				places you on a rung, holds it until you say climb, de-escalates for free, and closes every rep with one fix and
-				a clean stop. Its first offer to a nervous candidate is regulation, not a problem:
-			</p>
-			<ul class="border-surface-200-800 mt-6 divide-y divide-surface-200-800 border-y">
-				<li class="py-5">
-					<h3 class="text-lg font-semibold">A racing heart is preparation</h3>
-					<p class="text-surface-700-300 mt-2 text-sm leading-relaxed">
-						The surge is your body delivering oxygen for thinking. Naming it that way, out loud, is a
-						<a
-							href="/guide/interview-practice-evidence"
-							class="editorial-link text-primary-600 hover:text-primary-700 underline underline-offset-2"
-							>studied aid to performance under stress</a
-						>, not a pep talk.
-					</p>
-				</li>
-				<li class="py-5">
-					<h3 class="text-lg font-semibold">Four sighs, thirty seconds</h3>
-					<p class="text-surface-700-300 mt-2 text-sm leading-relaxed">
-						A double inhale through the nose, then a long exhale, four times. The interviewer offers it once at the
-						start of a rep; no is a complete answer.
-					</p>
-				</li>
-				<li class="py-5">
-					<h3 class="text-lg font-semibold">Narrated stuck beats silent stuck</h3>
-					<p class="text-surface-700-300 mt-2 text-sm leading-relaxed">
-						"I am blanking for a second" is a passing answer; going silent is the only failing one. After a real stall,
-						a hint arrives one step at a time and stops when you recover.
-					</p>
-				</li>
-			</ul>
-			<div class="bg-surface-100-900 mt-6 rounded-lg p-5 text-sm leading-relaxed">
-				<p class="font-semibold">None of it is scored.</p>
-				<p class="text-surface-700-300 mt-2">
-					No streaks, no badges, no solve counts. Arrival writing is never read, scored, or logged. Taking a hint is
-					engagement, not failure.
-				</p>
-			</div>
-			<p class="text-surface-700-300 mt-6 leading-relaxed">
-				There is no whiteboard in a Codespace; your comments are the whiteboard. Narrating your reasoning as you code,
-				in a room where nothing is at stake, builds the habit that holds when everything is. It is also simply good
-				engineering: clear, succinct, accurate comments, written while you work. The ritual is arcane; your engineering
-				is the music. The Woodshed exists so the music comes through.
+				Your comments can be the whiteboard. Keep one concrete correction, then stop or choose another session. The <a
+					href="/guide/interview-practice-evidence"
+					class="editorial-link underline underline-offset-2">practice evidence guide</a
+				>
+				explains the method and its limits.
 			</p>
 		</div>
 	</section>
@@ -209,9 +170,9 @@
 	<section class="mt-20 border-t border-surface-200-800 pt-12" aria-labelledby="other-surfaces">
 		<h2 id="other-surfaces" class="text-2xl font-bold">Match the surface to the skill</h2>
 		<p class="text-surface-700-300 mt-3 max-w-2xl leading-relaxed">
-			Editor reps are the default. Ask to study a problem first when you want the committed source and reference tests
-			open without starting a rep. Ask for an untimed conversation when you need to slow down and form a plan. Choose a
-			timed board-style rep when narration under a clock is the skill you intend to train.
+			Choose study when you want the committed source and reference tests open without starting a rep. Choose an untimed
+			talk session to slow down and form a plan, or a timed board session when narration under a clock is the skill you
+			intend to train.
 		</p>
 		<p class="text-surface-500 mt-4 text-sm">
 			Prefer local VS Code or no agent at all? The same workflow runs through the documented

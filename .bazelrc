@@ -1,20 +1,20 @@
-# dsa-woodshed.space Bazel Configuration
-#
-# Bazel 8 + Bzlmod. Mirrors the greatfallstoolbus.org site scaffold's
-# two-registry chain: tinyland-inc/bazel-registry first, then BCR. The
-# site build remains `pnpm run build`; Bazel exists for module-graph
-# integrity proofs (`just bazel-graph`).
-
+# Public, pinned scaffold graph. Remote service enrollment is a separate proof.
 common --enable_bzlmod
-common --registry=https://raw.githubusercontent.com/tinyland-inc/bazel-registry/main/
+common --registry=https://raw.githubusercontent.com/xoxd-ai/bazel-registry/6d008c192d1ef25f37e747fa1659109bcadb6666
 common --registry=https://bcr.bazel.build
-
-# Build performance
-build --jobs=auto
+common --lockfile_mode=error
+build --workspace_status_command=scripts/bazel/workspace-status.sh
+build --jobs=8
+build --worker_sandboxing
 build --disk_cache=~/.cache/bazel-dsa-woodshed
-build --keep_going
-
-# Test output
+build --@aspect_rules_ts//ts:skipLibCheck=always
+build --spawn_strategy=sandboxed,worker,local
+# Diagram rendering uses an explicitly selected browser from the Nix shell.
+build --action_env=PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+build --action_env=LD_LIBRARY_PATH
+build:ci --disk_cache=
+build:ci --color=no
+build:ci --curses=no
 test --test_output=errors
-
+test --test_timeout=120,600,1800,3600
 try-import %workspace%/user.bazelrc

@@ -6,6 +6,7 @@ import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { syncAlgorithms } from './sync-algorithms.mjs';
 import {
+	exportCapabilities,
 	publishTrackedOutputs,
 	readPacketFileAtCommit,
 	resolvePacketCommit,
@@ -38,7 +39,7 @@ const makePacketFixture = () => {
 	git(root, ['init', '--quiet']);
 	git(root, ['config', 'user.name', 'Woodshed Test']);
 	git(root, ['config', 'user.email', 'woodshed@example.invalid']);
-	write(root, 'agent-map.md', '# Agent map A\n');
+	write(root, 'capabilities.json', '# Capability inventory A\n');
 	write(root, 'docs/root.md', '# Root\n\n--8<-- "docs/include.md"\n');
 	write(root, 'docs/include.md', 'included from A\n');
 	write(
@@ -79,15 +80,15 @@ describe('packet sync provenance', () => {
 		const commitA = resolvePacketCommit(packet);
 		expect(commitA).toMatch(/^[0-9a-f]{40}$/);
 
-		write(packet, 'agent-map.md', '# dirty working tree\n');
-		expect(readPacketFileAtCommit(packet, commitA, 'agent-map.md')).toBe('# Agent map A\n');
+		write(packet, 'capabilities.json', '# dirty working tree\n');
+		expect(readPacketFileAtCommit(packet, commitA, 'capabilities.json')).toBe('# Capability inventory A\n');
 
-		write(packet, 'agent-map.md', '# Agent map B\n');
+		write(packet, 'capabilities.json', '# Capability inventory B\n');
 		write(packet, 'docs/include.md', 'included from B\n');
-		git(packet, ['add', 'agent-map.md', 'docs/include.md']);
+		git(packet, ['add', 'capabilities.json', 'docs/include.md']);
 		git(packet, ['commit', '--quiet', '-m', 'fixture B']);
 		expect(resolvePacketCommit(packet)).not.toBe(commitA);
-		expect(readPacketFileAtCommit(packet, commitA, 'agent-map.md')).toBe('# Agent map A\n');
+		expect(readPacketFileAtCommit(packet, commitA, 'capabilities.json')).toBe('# Capability inventory A\n');
 		const inputs = ['docs/root.md'];
 		expect(
 			resolveSnippetsAtCommit(
@@ -115,12 +116,29 @@ describe('packet sync provenance', () => {
 		);
 	});
 
+	it('exports the capability inventory from the locked source rather than a dirty catalog', () => {
+		const packet = makePacketFixture();
+		write(
+			packet,
+			'scripts/catalog.py',
+			'import json\nprint(json.dumps({"schema": 1, "capabilities": [{"id": "reference/example"}]}))\n',
+		);
+		git(packet, ['add', 'scripts/catalog.py']);
+		git(packet, ['commit', '--quiet', '-m', 'catalog A']);
+		const commit = resolvePacketCommit(packet);
+		write(packet, 'scripts/catalog.py', 'raise RuntimeError("dirty catalog must not execute")\n');
+		expect(JSON.parse(exportCapabilities(packet, commit))).toEqual({
+			schema: 1,
+			capabilities: [{ id: 'reference/example' }],
+		});
+	});
+
 	it('restores both tracked outputs when the second replacement fails', () => {
 		const root = mkdtempSync(path.join(tmpdir(), 'woodshed-publish-fixture-'));
 		temporaryRoots.push(root);
-		const agentMapPath = path.join(root, 'static/agent-map.md');
+		const capabilitiesPath = path.join(root, 'static/capabilities.json');
 		const manifestPath = path.join(root, 'src/content/.manifest.json');
-		write(root, 'static/agent-map.md', 'old map\n');
+		write(root, 'static/capabilities.json', 'old inventory\n');
 		write(root, 'src/content/.manifest.json', '{"old":true}\n');
 
 		let replacements = 0;
@@ -132,60 +150,60 @@ describe('packet sync provenance', () => {
 
 		expect(() =>
 			publishTrackedOutputs({
-				agentMapPath,
+				capabilitiesPath,
 				manifestPath,
-				agentMap: 'new map\n',
+				capabilities: 'new inventory\n',
 				manifestText: '{"new":true}\n',
 				replaceFile: failSecondReplacement,
 			}),
 		).toThrow('injected manifest replacement failure');
-		expect(readFileSync(agentMapPath, 'utf8')).toBe('old map\n');
+		expect(readFileSync(capabilitiesPath, 'utf8')).toBe('old inventory\n');
 		expect(readFileSync(manifestPath, 'utf8')).toBe('{"old":true}\n');
-		expect(readdirSync(path.dirname(agentMapPath))).toEqual(['agent-map.md']);
+		expect(readdirSync(path.dirname(capabilitiesPath))).toEqual(['capabilities.json']);
 		expect(readdirSync(path.dirname(manifestPath))).toEqual(['.manifest.json']);
 
 		publishTrackedOutputs({
-			agentMapPath,
+			capabilitiesPath,
 			manifestPath,
-			agentMap: 'new map\n',
+			capabilities: 'new inventory\n',
 			manifestText: '{"new":true}\n',
 		});
-		expect(readFileSync(agentMapPath, 'utf8')).toBe('new map\n');
+		expect(readFileSync(capabilitiesPath, 'utf8')).toBe('new inventory\n');
 		expect(readFileSync(manifestPath, 'utf8')).toBe('{"new":true}\n');
 	});
 
 	it('keeps prior or absent outputs when the first or second replacement fails', () => {
 		const root = mkdtempSync(path.join(tmpdir(), 'woodshed-publish-branches-'));
 		temporaryRoots.push(root);
-		const agentMapPath = path.join(root, 'static/agent-map.md');
+		const capabilitiesPath = path.join(root, 'static/capabilities.json');
 		const manifestPath = path.join(root, 'src/content/.manifest.json');
-		write(root, 'static/agent-map.md', 'old map\n');
+		write(root, 'static/capabilities.json', 'old inventory\n');
 		write(root, 'src/content/.manifest.json', '{"old":true}\n');
 
 		expect(() =>
 			publishTrackedOutputs({
-				agentMapPath,
+				capabilitiesPath,
 				manifestPath,
-				agentMap: 'new map\n',
+				capabilities: 'new inventory\n',
 				manifestText: '{"new":true}\n',
 				replaceFile: () => {
 					throw new Error('injected first replacement failure');
 				},
 			}),
 		).toThrow('injected first replacement failure');
-		expect(readFileSync(agentMapPath, 'utf8')).toBe('old map\n');
+		expect(readFileSync(capabilitiesPath, 'utf8')).toBe('old inventory\n');
 		expect(readFileSync(manifestPath, 'utf8')).toBe('{"old":true}\n');
 
 		const freshRoot = mkdtempSync(path.join(tmpdir(), 'woodshed-publish-fresh-'));
 		temporaryRoots.push(freshRoot);
-		const freshMap = path.join(freshRoot, 'static/agent-map.md');
+		const freshMap = path.join(freshRoot, 'static/capabilities.json');
 		const freshManifest = path.join(freshRoot, 'src/content/.manifest.json');
 		let replacements = 0;
 		expect(() =>
 			publishTrackedOutputs({
-				agentMapPath: freshMap,
+				capabilitiesPath: freshMap,
 				manifestPath: freshManifest,
-				agentMap: 'new map\n',
+				capabilities: 'new inventory\n',
 				manifestText: '{"new":true}\n',
 				replaceFile: (from, to) => {
 					replacements += 1;
@@ -198,23 +216,24 @@ describe('packet sync provenance', () => {
 		expect(() => readFileSync(freshManifest, 'utf8')).toThrow();
 	});
 
-	it('rejects a generated body or map that no longer matches the manifest', () => {
+	it('rejects a generated body or inventory that no longer matches the manifest', () => {
 		const root = mkdtempSync(path.join(tmpdir(), 'woodshed-verifier-fixture-'));
 		temporaryRoots.push(root);
 		const body = '# Generated body\n';
-		const agentMap = '# Agent map\n';
+		const capabilities = '# Capability inventory\n';
 		const digest = (text: string) => createHash('sha256').update(text, 'utf8').digest('hex');
 		write(root, 'src/content/guide/example.md', body);
-		write(root, 'static/agent-map.md', agentMap);
+		write(root, 'static/capabilities.json', capabilities);
 		write(
 			root,
 			'src/content/.manifest.json',
 			JSON.stringify({
+				schemaVersion: 2,
 				sourceCommit: 'a'.repeat(40),
-				agentMap: {
-					input: 'agent-map.md',
-					out: 'static/agent-map.md',
-					sha256: digest(agentMap),
+				capabilities: {
+					input: 'capabilities.json',
+					out: 'static/capabilities.json',
+					sha256: digest(capabilities),
 				},
 				entries: [{ out: 'guide/example.md', sha256: digest(body) }],
 			}),
@@ -223,7 +242,7 @@ describe('packet sync provenance', () => {
 		expect(verifyContentSync(root)).toEqual({
 			sourceCommit: 'a'.repeat(40),
 			entries: 1,
-			agentMap: 'static/agent-map.md',
+			capabilities: 'static/capabilities.json',
 		});
 		write(root, 'src/content/guide/example.md', '# interrupted sync\n');
 		expect(() => verifyContentSync(root)).toThrow('digest mismatch for src/content/guide/example.md');

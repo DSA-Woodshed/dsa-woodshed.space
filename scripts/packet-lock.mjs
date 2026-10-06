@@ -186,6 +186,9 @@ export function advancePacketLock(targetCommit, options = {}) {
 	const packetPath = resolve(options.packetPath ?? DEFAULT_PACKET_PATH);
 	const manifestPath = resolve(options.manifestPath ?? MANIFEST_PATH);
 	const oldLock = readPacketLock(manifestPath);
+	const targetBooklet = options.bookletMetadata
+		? parseBookletMetadata(JSON.stringify(options.bookletMetadata))
+		: oldLock.booklet;
 	const resolvedCommit = resolveReachablePacketCommit(packetPath, targetCommit);
 	(options.verifyPublished ?? verifyPublishedPacketCommit)(oldLock.sourceRepo, resolvedCommit, options.remoteUrl);
 	const trackedRoot = resolve(dirname(manifestPath), '..', '..');
@@ -198,13 +201,14 @@ export function advancePacketLock(targetCommit, options = {}) {
 	}
 	const snapshot = snapshotPaths([
 		join(trackedRoot, 'src', 'content'),
-		join(trackedRoot, 'static', 'agent-map.md'),
+		join(trackedRoot, 'static', 'capabilities.json'),
 		join(trackedRoot, 'static', 'generated'),
 	]);
 
 	try {
 		const targetManifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 		targetManifest.sourceCommit = resolvedCommit;
+		targetManifest.booklet = targetBooklet;
 		writeFileSync(manifestPath, JSON.stringify(targetManifest, null, '\t') + '\n');
 		(options.runSync ?? execFileSync)(process.execPath, [join(trackedRoot, 'scripts', 'sync-content.mjs')], {
 			cwd: trackedRoot,
@@ -214,12 +218,10 @@ export function advancePacketLock(targetCommit, options = {}) {
 				WOODSHED_PACKET_PATH: packetPath,
 			},
 		});
-		const newLock = verifyGeneratedLock(
-			oldLock.sourceRepo,
-			resolvedCommit,
-			bookletDigest(oldLock.booklet),
-			manifestPath,
-		);
+		const newLock = verifyGeneratedLock(oldLock.sourceRepo, resolvedCommit, bookletDigest(targetBooklet), manifestPath);
+		if (serializeBookletMetadata(newLock.booklet) !== serializeBookletMetadata(targetBooklet)) {
+			throw new Error('content sync changed the requested booklet metadata');
+		}
 		return { oldLock, newLock };
 	} catch (error) {
 		snapshot.restore();
@@ -234,7 +236,7 @@ export function advancePacketLock(targetCommit, options = {}) {
 function usage() {
 	return [
 		'usage:',
-		'  node scripts/packet-lock.mjs <40-char-sha>',
+		'  node scripts/packet-lock.mjs <40-char-sha> [--booklet-metadata <path>]',
 		'  node scripts/packet-lock.mjs --github-output [path]',
 		'  node scripts/packet-lock.mjs --verify-checkout [packet-path]',
 		'  node scripts/packet-lock.mjs --verify-generated <repo> <40-char-sha> <booklet-digest>',
@@ -266,10 +268,16 @@ function main(args) {
 		console.log(`packet-lock: reproduced ${lock.sourceRepo}@${lock.sourceCommit}`);
 		return;
 	}
-	if (!command || rest.length !== 0) throw new Error(usage());
-	const { oldLock, newLock } = advancePacketLock(command);
+	if (!command || (rest.length !== 0 && (rest.length !== 2 || rest[0] !== '--booklet-metadata'))) {
+		throw new Error(usage());
+	}
+	const bookletMetadata = rest.length === 2 ? parseBookletMetadata(readFileSync(resolve(rest[1]), 'utf8')) : undefined;
+	const { oldLock, newLock } = advancePacketLock(command, { bookletMetadata });
 	console.log(`packet-lock: old ${oldLock.sourceRepo}@${oldLock.sourceCommit}`);
 	console.log(`packet-lock: new ${newLock.sourceRepo}@${newLock.sourceCommit}`);
+	console.log(
+		`packet-lock: booklet ${newLock.booklet.sourceRepo}@${newLock.booklet.tagName} ${bookletDigest(newLock.booklet)}`,
+	);
 }
 
 if (resolve(process.argv[1] ?? '') === THIS_FILE) {

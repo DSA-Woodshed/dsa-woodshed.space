@@ -29,7 +29,7 @@ import { join } from 'node:path';
 // mirrored, so this gate cannot drift from the dialog's behavior.
 import { routeUrl } from '../src/lib/search/route-url.js';
 
-const BUILD_DIR = 'build';
+const BUILD_DIR = process.env.BUILD_OUTPUT_DIR || 'build';
 const PAGEFIND_DIR = join(BUILD_DIR, 'pagefind');
 const PAGEFIND_JS = join(PAGEFIND_DIR, 'pagefind.js');
 const FRAGMENT_DIR = join(PAGEFIND_DIR, 'fragment');

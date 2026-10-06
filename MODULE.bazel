@@ -1,64 +1,42 @@
-"""
-dsa-woodshed.space - Bazel Module Configuration
+"""DSA Woodshed public scaffold build graph."""
 
-Static-first SvelteKit consumer of the @tummycrypt/* npm packages
-produced by tinyland-inc/bazel-registry, following the
-greatfallstoolbus.org site-scaffold shape. The canonical site build is
-`pnpm run build`; Bazel exists for module-graph integrity proofs and is
-exercised via `just bazel-graph` (`bazelisk mod graph`) locally and in CI.
+module(name = "dsa_woodshed_space", version = "0.1.0", compatibility_level = 1)
 
-The tinyland bazel-registry is the version source of truth for in-house
-packages. package.json must pin the SAME versions — enforced by
-`scripts/check-inhouse-package-parity.py` (chained into `pnpm run lint`).
-@tummycrypt/tinyvectors in particular is never resolved from the public
-npm registry: package.json pins the GitHub tag archive listed in the
-registry's modules/tummycrypt_tinyvectors/0.3.6/source.json, and
-scripts/build-tinyvectors.mjs compiles it after install.
-"""
-
-module(
-    name = "dsa_woodshed_space",
-    version = "0.1.0",
-    compatibility_level = 1,
-)
-
-# Core
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
 bazel_dep(name = "platforms", version = "1.0.0")
-
-# JS/TS toolchain (Aspect)
+bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
+bazel_dep(name = "rules_pkg", version = "1.1.0")
 bazel_dep(name = "rules_nodejs", version = "6.7.3")
 bazel_dep(name = "aspect_rules_js", version = "2.9.1")
+bazel_dep(name = "aspect_rules_ts", version = "3.8.4")
 
-# Tinyland building-block deps via tinyland-inc/bazel-registry
-# (versions must match package.json + the registry; verify with `just inhouse-package-parity`).
-bazel_dep(name = "tummycrypt_vite_plugin_a11y", version = "0.2.2")
-bazel_dep(name = "tummycrypt_vite_plugin_skeleton_colors", version = "0.2.2")
-bazel_dep(name = "tummycrypt_tinyvectors", version = "0.3.6")
+# Published public artifacts; first-party JavaScript enters via //:pkg graph links.
+bazel_dep(name = "tummycrypt_tinyland_color_utils", version = "0.2.3")
+bazel_dep(name = "tummycrypt_vite_plugin_a11y", version = "0.2.4")
+bazel_dep(name = "tummycrypt_vite_plugin_skeleton_colors", version = "0.2.4")
+bazel_dep(name = "tummycrypt_tinyvectors", version = "0.3.7")
+bazel_dep(name = "xoxd_public_chrome", version = "0.1.0")
+bazel_dep(name = "xoxd_theme", version = "0.1.1")
 
-# Node 22.13.1
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(node_version = "22.13.1")
 
-# pnpm 10.13.1
 pnpm = use_extension("@aspect_rules_js//npm:extensions.bzl", "pnpm")
-pnpm.pnpm(
-    name = "pnpm",
-    pnpm_version = "10.13.1",
-)
+pnpm.pnpm(name = "pnpm", pnpm_version = "10.13.1")
 use_repo(pnpm, "pnpm")
 
-# npm via pnpm-lock.yaml. Repo name "npm" matches the elders / Aspect
-# convention; the selected @tummycrypt modules all use per-module
-# <module>_npm naming, so there is no @npm collision risk.
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
 npm.npm_translate_lock(
     name = "npm",
     npmrc = "//:.npmrc",
     pnpm_lock = "//:pnpm-lock.yaml",
-    data = [
-        "//:package.json",
-        "//:pnpm-workspace.yaml",
-    ],
+    data = ["//:package.json", "//:pnpm-workspace.yaml"],
 )
 use_repo(npm, "npm")
+
+rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
+rules_ts_ext.deps(
+    ts_version = "6.0.3",
+    ts_integrity = "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==",
+)
+use_repo(rules_ts_ext, "npm_typescript")

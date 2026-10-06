@@ -11,7 +11,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	// The canonical source lives in the content repo (Jesssullivan/dsa-study-packet).
+	// The canonical source lives in the content repo (DSA-Woodshed/dsa-study-packet).
 	const sourcePath = 'docs/guide/interview-practice-evidence.md';
 	const title = (metadata.title as string) ?? 'Interview practice evidence';
 	const adjacent = $derived(neighbors('guide', 'interview-practice-evidence'));

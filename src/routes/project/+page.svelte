@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { REPO_SLUG, REPO_URL } from '$lib/repo';
+	import { REPO_URL } from '$lib/repo';
 	import { SOURCE_OF_TRUTH_ROUTE } from '$lib/navigation';
 
-	const CODESPACES_URL = `https://codespaces.new/${REPO_SLUG}?quickstart=1`;
 	const SECURITY_URL = `${REPO_URL}/security/advisories/new`;
 </script>
 
@@ -12,17 +11,16 @@
 		<h1 class="mt-3 max-w-3xl text-4xl leading-tight font-bold md:text-6xl">A public woodshed</h1>
 		<p class="text-surface-700-300 mt-6 max-w-2xl text-xl leading-relaxed font-semibold">
 			The DSA Woodshed is a public, company-neutral interview-practice product: a packet repository of problems, tests,
-			and print material, plus this reading site, which re-syncs the packet's content on every deploy.
+			and print material, plus this reading site, which reproduces an exact packet revision on every deploy.
 		</p>
 	</header>
 
 	<section class="mt-20 border-t border-surface-200-800 pt-12" aria-labelledby="live-now">
 		<h2 id="live-now" class="text-2xl font-bold">What is live now</h2>
 		<p class="text-surface-700-300 mt-3 max-w-2xl leading-relaxed">
-			The Python track: 43 core problems with reference solutions and focused tests, editor-first reps in GitHub
-			Codespaces with a resident interviewer, and a printable booklet with reference sheets you can also read on this
-			site. Python is the only runnable track today. R, TypeScript, and C++ are inert provisional reservations; Rust is
-			exploratory and not runnable. They remain inactive until the interview cycle is explicitly declared complete.
+			The Python track has reference solutions and focused tests, isolated editor-first sessions, and a verified
+			printable booklet. Python is the only runnable track today. Future languages need their own justified curriculum
+			and working exercises. R, Stan, and Quarto reporting will begin with a bounded real-data pilot.
 		</p>
 	</section>
 
@@ -40,11 +38,11 @@
 		<ul class="mt-6 max-w-2xl space-y-4 text-sm">
 			<li>
 				<a
-					href={CODESPACES_URL}
+					href="/start"
 					target="_blank"
 					rel="noopener"
 					class="editorial-link text-primary-600 hover:text-primary-700 font-semibold underline underline-offset-2"
-					>Start in Codespaces</a
+					>Choose a session</a
 				>
 			</li>
 			<li>

@@ -15,15 +15,15 @@ const THIS_FILE = fileURLToPath(import.meta.url);
 const HERE = dirname(THIS_FILE);
 const REPO_ROOT = resolve(HERE, '..');
 
-export const SOURCE_REPO = 'Jesssullivan/dsa-study-packet';
-export const BOOKLET_REPOSITORIES = new Set([SOURCE_REPO, 'DSA-Woodshed/dsa-study-packet']);
+export const SOURCE_REPO = 'DSA-Woodshed/dsa-study-packet';
+export const BOOKLET_REPOSITORIES = new Set([SOURCE_REPO, 'Jesssullivan/dsa-study-packet']);
 export const BOOKLET_ASSET_NAME = 'booklet.pdf';
 export const LATEST_RELEASE_API_URL = `https://api.github.com/repos/${SOURCE_REPO}/releases/latest`;
 export const BOOKLET_METADATA_PATH = join(REPO_ROOT, 'src', 'content', '.booklet.json');
 export const DEFAULT_FETCH_TIMEOUT_MS = 30_000;
 export const MAX_BOOKLET_BYTES = 50 * 1024 * 1024;
 const STATIC_ASSET_ROOT = join(REPO_ROOT, 'static');
-const BUILD_ASSET_ROOT = join(REPO_ROOT, 'build');
+const BUILD_ASSET_ROOT = process.env.BUILD_OUTPUT_DIR || join(REPO_ROOT, 'build');
 const GENERATED_BOOKLET_NAME = /^booklet-(?:[0-9a-f]{64})\.pdf(?:\.tmp-\d+)?$/;
 const LEGACY_BOOKLET_NAME = /^booklet\.pdf(?:\.tmp-\d+)?$/;
 

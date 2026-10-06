@@ -7,9 +7,8 @@ node_modules/
 build/
 dist/
 
-# Bazel (module-graph integrity proofs only; see MODULE.bazel)
-bazel-*
-MODULE.bazel.lock
+# Bazel derived outputs
+/bazel-*
 user.bazelrc
 
 # Synced content (BUILD INPUT). The prose/reference SSOT is the DSA study packet;
@@ -19,14 +18,12 @@ user.bazelrc
 # Regenerate with `pnpm run sync-content` (or `just build`).
 src/content/**
 !src/content/.manifest.json
-static/agent-map.md.tmp-*
+static/fonts/
+static/capabilities.json.tmp-*
 static/generated/booklet-*.pdf
 
-# Web-perf artifacts: generated image variants, bundle treemap, and the
-# generated image manifest. Regenerate via `pnpm run optimize:images`.
-static/optimized/
+# Bundle analysis artifacts.
 .bundle-stats/
-src/lib/image-manifest.json
 
 # Build-time Mermaid render cache (content-addressed by diagram source hash).
 # See src/lib/docs/mermaid.ts. Pure build optimization, safe to delete/regenerate.
@@ -64,3 +61,10 @@ Thumbs.db
 .serena/
 .aider*
 .gstack/
+
+# Personal contribution overlays
+AGENTS.md
+CLAUDE.md
+.agents/
+.claude-plugin/
+plugins/

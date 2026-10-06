@@ -3,13 +3,13 @@
 // Adapted from greatfallstoolbus.org/src/lib/repo.ts. There, the slug named the
 // site's own repo; here The DSA Woodshed is a *reading surface* whose prose and
 // reference sheets are authored and tracked in a separate content repo
-// (Jesssullivan/dsa-study-packet). So the "edit this page" / "view source"
+// (DSA-Woodshed/dsa-study-packet). So the "edit this page" / "view source"
 // affordances resolve against that repo, not this presentation repo.
 //
 // Every page-source URL in the app (SourceLink.svelte, the operator-docs link
 // resolver in src/lib/docs/registry.ts) flows from the constants below, so no
 // org/repo string is hand-inlined anywhere else.
-export const REPO_SLUG = 'Jesssullivan/dsa-study-packet';
+export const REPO_SLUG = 'DSA-Woodshed/dsa-study-packet';
 
 export const REPO_URL = `https://github.com/${REPO_SLUG}`;
 

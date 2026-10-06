@@ -9,11 +9,6 @@ export interface PrimaryNavLink {
 
 export const PROJECT_ROUTE = '/project';
 
-/** The agent-facing traversal map: not part of the primary nav (see
- * llms.txt / agent-map.md, which point here directly), but still a real
- * routed page enumerated in the sitemap. */
-export const AGENT_ROUTE = '/agent';
-
 /** The source-of-truth contract page: an ordinary Method entry, but excluded
  * from Method's nav highlighting (see below) so it never doubles up with the
  * dedicated Project landing. */

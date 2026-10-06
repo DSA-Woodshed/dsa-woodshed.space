@@ -3,7 +3,7 @@
 //
 // PROVENANCE / SHAPE
 //   The bodies this registry describes are authored in a SEPARATE repo: the DSA
-//   study packet (Jesssullivan/dsa-study-packet), and pulled in by
+//   study packet (DSA-Woodshed/dsa-study-packet), and pulled in by
 //   scripts/sync-content.mjs, which writes src/content/** (gitignored build
 //   input) plus a committed manifest, src/content/.manifest.json. This registry
 //   reads that manifest for the per-entry facts derived from the source
@@ -67,7 +67,7 @@ interface ManifestEntry {
 interface Manifest {
 	sourceRepo: string;
 	sourceCommit: string;
-	agentMap: {
+	capabilities: {
 		input: string;
 		out: string;
 		sha256: string;
@@ -79,8 +79,8 @@ const manifest = manifestJson as Manifest;
 
 /** The packet commit the current src/content was synced from (for provenance UIs). */
 export const sourceCommit = manifest.sourceCommit;
-/** Source and published-path metadata for the generated machine-readable map. */
-export const agentMapMetadata = manifest.agentMap;
+/** Source and published-path metadata for the generated capability inventory. */
+export const capabilitiesMetadata = manifest.capabilities;
 
 // Compatibility summaries for packet commits that predate source-authored
 // frontmatter descriptions, keyed `${section}/${slug}`.

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="omux" data-mode="light">
+<html lang="en" data-theme="xoxd" data-mode="dark">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,25 +8,6 @@
 		     stack a second, generic copy onto every prerendered page. -->
 		<meta name="color-scheme" content="light dark" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
-		<script>
-			// FOUC prevention: read color-mode and theme from localStorage and
-			// apply data-mode + data-theme synchronously before Svelte mounts.
-			(function () {
-				try {
-					var stored = localStorage.getItem('color-mode');
-					var prefers = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-					var mode = stored === 'light' || stored === 'dark' ? stored : prefers ? 'dark' : 'light';
-					document.documentElement.setAttribute('data-mode', mode);
-					document.documentElement.style.colorScheme = mode;
-					var theme = localStorage.getItem('skeleton-theme');
-					if (theme) {
-						document.documentElement.setAttribute('data-theme', theme);
-					}
-				} catch (e) {
-					// localStorage unavailable (privacy mode, SSR, etc.) — keep defaults.
-				}
-			})();
-		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
