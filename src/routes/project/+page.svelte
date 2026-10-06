@@ -20,7 +20,11 @@
 		<p class="text-surface-700-300 mt-3 max-w-2xl leading-relaxed">
 			The Python track has reference solutions and focused tests, isolated editor-first sessions, and a verified
 			printable booklet. Python is the only runnable track today. Future languages need their own justified curriculum
-			and working exercises. R, Stan, and Quarto reporting will begin with a bounded real-data pilot.
+			and working exercises.
+		</p>
+		<p class="text-surface-700-300 mt-3 max-w-2xl leading-relaxed">
+			Backlog: private learner-progress analysis from existing practice evidence. R/Stan analysis with Quarto reporting
+			is the preference for that work; it remains unimplemented.
 		</p>
 	</section>
 

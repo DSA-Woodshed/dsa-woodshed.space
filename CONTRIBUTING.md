@@ -6,21 +6,28 @@ adapted from the Great Falls Tool Bus fork-first contribution model.
 Fork `DSA-Woodshed/dsa-woodshed.space`, clone your fork as `origin`, and add the
 org repository as `upstream`. For Jess, the preserved personal fork is
 `Jesssullivan/dsa-woodshed.space-contrib`. Push contribution branches to your
-fork and open a pull request to org `main`. Changes land through squash review.
+fork and open a pull request to org `main`. Reviewed merge commits preserve the
+signed source commits from the fork branch.
 
 ```sh
 git remote add upstream https://github.com/DSA-Woodshed/dsa-woodshed.space.git
-git config remote.pushDefault origin
+git remote -v
 nix develop .#playwright
 just setup
 just gate
 just e2e
 ```
 
-Use signed commits and semantic branch names. `just setup` installs the shared
-public contribution hooks at `.githooks`. Their byte authority is
-[DSA-Woodshed/.github](https://github.com/DSA-Woodshed/.github/tree/83f555ca5cb0ee01fa35cb6947f1b0e80228d332/githooks),
-pinned at org commit `83f555ca5cb0ee01fa35cb6947f1b0e80228d332`, adapted from GFTB revision `7a4702fdb6bbeb99c4387d09f48cba096857c9ca`.
+Use signed commits and semantic branch names. `just setup` optionally verifies
+the current GitHub login and fork parent/source before installing shared hooks
+at `.githooks` and setting an absent push default to `origin`. It preserves custom
+checkout hooks, existing push defaults, linked-worktree configuration, remote
+URLs, and signing settings. Shared or unverified checkouts receive a diagnostic
+and continue public setup without changing Git settings. Inspect configuration
+and coordinate with the checkout owner before changing a preserved setting.
+The shared hooks retain a distinct global hook layer. Their byte authority is
+[DSA-Woodshed/.github](https://github.com/DSA-Woodshed/.github/tree/76f30db016acea5c2de6f0aadd6fca5dc2989904/githooks),
+pinned at org commit `76f30db016acea5c2de6f0aadd6fca5dc2989904`, adapted from GFTB revision `7a4702fdb6bbeb99c4387d09f48cba096857c9ca`.
 Include the commands and observed results in your pull request; a local validation
 receipt establishes only checks that actually ran.
 

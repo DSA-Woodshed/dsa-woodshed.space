@@ -127,8 +127,8 @@
 			<p class="text-primary-600 text-xs font-semibold tracking-widest uppercase">The point</p>
 			<h2 id="why-woodshed" class="mt-2 text-2xl font-bold">Practice explaining your work</h2>
 			<p class="text-surface-700-300 mt-3 leading-relaxed">
-				Solving the problem is one skill. Explaining your examples, assumptions, and corrections is another. Use an
-				untimed talk session to form a plan, a board session to narrate under a clock, or a mock session to rehearse the
+				Solving the problem is one skill. Explaining your examples, assumptions, and corrections is another. Use a talk
+				session to form a plan, a board session to narrate within your chosen budget, or a mock session to rehearse the
 				full conversation.
 			</p>
 			<p class="text-surface-700-300 mt-4 leading-relaxed">
@@ -170,9 +170,9 @@
 	<section class="mt-20 border-t border-surface-200-800 pt-12" aria-labelledby="other-surfaces">
 		<h2 id="other-surfaces" class="text-2xl font-bold">Match the surface to the skill</h2>
 		<p class="text-surface-700-300 mt-3 max-w-2xl leading-relaxed">
-			Choose study when you want the committed source and reference tests open without starting a rep. Choose an untimed
-			talk session to slow down and form a plan, or a timed board session when narration under a clock is the skill you
-			intend to train.
+			Choose study when you want the committed source and reference tests open without starting a rep. Choose a talk
+			session to slow down and form a plan, or a board session to rehearse explaining within the time you have. Use your
+			own clock for a timed rep; the session command records your budget without starting a timer.
 		</p>
 		<p class="text-surface-500 mt-4 text-sm">
 			Prefer local VS Code or no agent at all? The same workflow runs through the documented

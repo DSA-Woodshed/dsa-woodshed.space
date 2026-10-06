@@ -38,4 +38,24 @@ describe('canonical session command handoff', () => {
 		expect(() => sessionCommand({ ...reading, id: 'reference/unknown' }, 'read', 15)).toThrow(/available/);
 		expect(() => sessionCommand(reading, 'implement', 15)).toThrow(/supported mode/);
 	});
+
+	it('uses the published modes even when a caller changes its local capability copy', () => {
+		expect(() => sessionCommand({ ...reading, modes: ['read', 'implement'] }, 'implement', 15)).toThrow(
+			/supported mode/,
+		);
+		expect(sessionCommand({ ...algorithm, modes: [] }, 'study', 15)).toBe(
+			`just session start ${algorithm.id} --mode study --minutes 15`,
+		);
+	});
+
+	it('keeps command eligibility intact when a consumer mutates the exported modes array', () => {
+		const originalModes = [...reading.modes];
+		try {
+			reading.modes.push('implement');
+			expect(() => sessionCommand(reading, 'implement', 15)).toThrow(/supported mode/);
+			expect(sessionCommand(reading, 'read', 15)).toBe(`just session start ${reading.id} --mode read --minutes 15`);
+		} finally {
+			reading.modes.splice(0, reading.modes.length, ...originalModes);
+		}
+	});
 });
