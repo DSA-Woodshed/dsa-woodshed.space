@@ -243,12 +243,15 @@ test('printables serves the verified booklet from the same origin with keyboard 
 	browserName,
 }) => {
 	await page.setViewportSize({ width: 1440, height: 1200 });
-	await page.goto('/printables');
+	await openProductPage(page, '/printables');
 
 	const reader = page.getByTestId('printable-reader');
 	const openAction = reader.getByRole('link', { name: 'Open full screen' });
 	const downloadAction = reader.getByRole('link', { name: 'Download PDF' });
+	const htmlAction = reader.getByRole('link', { name: 'Read HTML reference sheets' });
 	await expect(reader).toBeVisible();
+	await expect(htmlAction).toHaveAttribute('href', '/reference');
+	await expect(reader.getByText(/The PDF does not include accessibility tags/)).toBeVisible();
 	await expect(reader.getByText(/v\d+\.\d+\.\d+ · SHA-256 verified/)).toBeVisible();
 	const localUrl = await openAction.getAttribute('href');
 	expect(localUrl).toMatch(/^\/generated\/booklet-[0-9a-f]{64}\.pdf$/);
@@ -292,6 +295,12 @@ test('printables serves the verified booklet from the same origin with keyboard 
 		await page.keyboard.press('Tab');
 	}
 	await expect(downloadAction).toBeFocused();
+	if (browserName === 'webkit') {
+		await htmlAction.focus();
+	} else {
+		await page.keyboard.press('Tab');
+	}
+	await expect(htmlAction).toBeFocused();
 
 	await page.setViewportSize({ width: 768, height: 1024 });
 	if (pdfViewerEnabled) {
@@ -304,6 +313,9 @@ test('printables serves the verified booklet from the same origin with keyboard 
 	expect(response.ok()).toBe(true);
 	expect(response.headers()['content-type']).toContain('application/pdf');
 	expect((await response.body()).subarray(0, 5).toString('ascii')).toBe('%PDF-');
+	await htmlAction.press('Enter');
+	await expect(page).toHaveURL(/\/reference$/);
+	await expect(page.getByRole('heading', { level: 1, name: 'Reference Sheets', exact: true })).toBeVisible();
 });
 
 // Issue #30 regression guard: +layout.svelte used to mount two SearchDialog
@@ -348,7 +360,9 @@ test('mobile-viewport search resolves a real result end-to-end (390px)', async (
 	await expect(page.getByText('No results for "is prime".')).toHaveCount(0);
 });
 
-test('printables keeps both 44px actions visible when the embedded reader is hidden on mobile', async ({ page }) => {
+test('printables keeps PDF and HTML 44px actions visible when the embedded reader is hidden on mobile', async ({
+	page,
+}) => {
 	await page.setViewportSize({ width: 390, height: 1200 });
 	await page.goto('/printables');
 
@@ -357,6 +371,7 @@ test('printables keeps both 44px actions visible when the embedded reader is hid
 	const actions = [
 		reader.getByRole('link', { name: 'Open full screen' }),
 		reader.getByRole('link', { name: 'Download PDF' }),
+		reader.getByRole('link', { name: 'Read HTML reference sheets' }),
 	];
 	for (const action of actions) {
 		await expect(action).toBeVisible();
@@ -364,4 +379,20 @@ test('printables keeps both 44px actions visible when the embedded reader is hid
 		expect(box?.height).toBeGreaterThanOrEqual(44);
 	}
 	await expect(reader.getByText(/Phone PDF viewers vary/)).toBeVisible();
+});
+
+test('an unavailable native PDF viewer retains a keyboard route to the HTML reference sheets', async ({ page }) => {
+	await page.addInitScript(() => {
+		Object.defineProperty(navigator, 'pdfViewerEnabled', { value: false });
+	});
+	await openProductPage(page, '/printables');
+	const reader = page.getByTestId('printable-reader');
+	await expect(reader.locator('object[type="application/pdf"]')).toHaveCount(0);
+	await expect(reader.getByTestId('pdf-reader-unavailable')).toBeVisible();
+	const htmlAction = reader.getByRole('link', { name: 'Read HTML reference sheets' });
+	await expect(htmlAction).toBeVisible();
+	await htmlAction.focus();
+	await htmlAction.press('Enter');
+	await expect(page).toHaveURL(/\/reference$/);
+	await expect(page.getByRole('heading', { level: 1, name: 'Reference Sheets', exact: true })).toBeVisible();
 });

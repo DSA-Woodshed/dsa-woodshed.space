@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Download, ExternalLink, FileCheck2 } from '@lucide/svelte';
+	import { BookOpen, Download, ExternalLink, FileCheck2 } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import type { BookletMetadata } from '$lib/docs/booklet';
 
@@ -65,7 +65,18 @@
 				<Download size={18} aria-hidden="true" />
 				Download PDF
 			</a>
+			<a
+				href="/reference"
+				class="border-surface-400-600 bg-surface-50-950 hover:bg-surface-200-800 focus-visible:outline-primary-500 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border px-4 py-2 font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto"
+			>
+				<BookOpen size={18} aria-hidden="true" />
+				Read HTML reference sheets
+			</a>
 		</nav>
+		<p class="text-surface-600-400 text-sm">
+			The PDF does not include accessibility tags. The HTML reference sheets provide structured headings and browser
+			navigation.
+		</p>
 
 		{#if pdfViewerEnabled}
 			<div class="border-surface-300-700 hidden overflow-hidden rounded-lg border md:block">
