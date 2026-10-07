@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
-      - uses: DeterminateSystems/nix-installer-action@v21
+      - uses: DeterminateSystems/nix-installer-action@v23
       - name: Read the committed packet lock
         id: packet-lock
         run: nix develop --command node scripts/packet-lock.mjs --github-output
