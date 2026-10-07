@@ -385,7 +385,18 @@ test('an unavailable native PDF viewer retains a keyboard route to the HTML refe
 	await page.addInitScript(() => {
 		Object.defineProperty(navigator, 'pdfViewerEnabled', { value: false });
 	});
-	await openProductPage(page, '/printables');
+	// The server-rendered PDF object can start Chromium's own viewer before
+	// hydration reads this false capability fixture and removes the object.
+	// Admit only that viewer's canceled stylesheet; public/module errors remain fatal.
+	const { expectedRequestFailures } = await openProductPage(page, '/printables', {
+		expectedRequestFailure: {
+			url: 'chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai/pdf_embedder.css',
+			errorText: 'net::ERR_ABORTED',
+		},
+	});
+	for (const failure of expectedRequestFailures) {
+		test.info().annotations.push({ type: 'native-viewer-fixture-cleanup', description: failure });
+	}
 	const reader = page.getByTestId('printable-reader');
 	await expect(reader.locator('object[type="application/pdf"]')).toHaveCount(0);
 	await expect(reader.getByTestId('pdf-reader-unavailable')).toBeVisible();

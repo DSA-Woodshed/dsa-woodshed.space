@@ -31,3 +31,18 @@ test('page-loaded guard accepts the authored reference heading instead of its na
 	);
 	await openProductPage(page, '/reference/algorithm-templates');
 });
+
+test('an expected native PDF cleanup cannot hide a failed public client module', async ({ page }) => {
+	await page.addInitScript(() => {
+		Object.defineProperty(navigator, 'pdfViewerEnabled', { value: false });
+	});
+	await page.route('**/_app/immutable/entry/start.*.js', (route) => route.abort('aborted'));
+	await expect(
+		openProductPage(page, '/printables', {
+			expectedRequestFailure: {
+				url: 'chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai/pdf_embedder.css',
+				errorText: 'net::ERR_ABORTED',
+			},
+		}),
+	).rejects.toThrow('/printables must load without browser errors');
+});

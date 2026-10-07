@@ -23,12 +23,26 @@ const headings = new Map([
 		}),
 ]);
 
-export async function openProductPage(page: Page, route: string) {
+export async function openProductPage(
+	page: Page,
+	route: string,
+	options: { expectedRequestFailure?: { url: string; errorText: string } } = {},
+) {
 	const heading = headings.get(route);
 	if (!heading) throw new Error(`No rendered-page expectation for ${route}`);
 	const errors: string[] = [];
 	const onPageError = (error: Error) => errors.push(error.message);
-	const onRequestFailed = (request: Request) => errors.push(`${request.url()}: ${request.failure()?.errorText}`);
+	const expectedRequestFailures: string[] = [];
+	const onRequestFailed = (request: Request) => {
+		const url = request.url();
+		const errorText = request.failure()?.errorText;
+		const failure = `${url}: ${errorText}`;
+		if (url === options.expectedRequestFailure?.url && errorText === options.expectedRequestFailure.errorText) {
+			expectedRequestFailures.push(failure);
+		} else {
+			errors.push(failure);
+		}
+	};
 	const onConsole = (message: ConsoleMessage) => {
 		if (message.type() === 'error') errors.push(message.text());
 	};
@@ -41,6 +55,7 @@ export async function openProductPage(page: Page, route: string) {
 		await page.waitForLoadState('networkidle');
 		await expect(page.getByRole('heading', { level: 1, name: heading, exact: true })).toBeVisible();
 		expect(errors, `${route} must load without browser errors`).toEqual([]);
+		return { expectedRequestFailures };
 	} finally {
 		page.off('pageerror', onPageError);
 		page.off('requestfailed', onRequestFailed);
